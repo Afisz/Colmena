@@ -1,0 +1,57 @@
+@font-face {
+    font-family: Roboto;
+    src: url("../fonts/Roboto/Roboto-Light.ttf");
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+.google-btn {
+  width: 240px;
+  height: 50px;
+  background-color: #4285f4;
+  border-radius: 1px;
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,.25);
+}
+
+.google-btn:hover {
+    cursor: pointer;
+  }
+
+.google-icon-wrapper {
+    position: absolute;
+    margin-top: 1px;
+    margin-left: 1px;
+    width: 48px;
+    height: 48px;
+    border-radius: 1px;
+    background-color: #fff;
+}
+
+.google-icon {
+    position: absolute;
+    margin-top: 15px;
+    margin-left: 15px;
+    width: 18px;
+    height: 18px;
+}
+
+.btn-text {
+    color: #fff;
+    font-size: 16px;
+    letter-spacing: 0.21px;
+    font-family: Roboto,arial,sans-serif;
+    line-height: 48px;
+}
+
+.btn-text b {
+    margin-left: 70px;
+}
+
+.google-btn:hover {
+    box-shadow: 0 0 6px #4285f4;
+}
+
+.google-btn:active {
+    background: #1669F2;
+}

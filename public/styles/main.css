@@ -1,0 +1,169 @@
+/* General */
+.dropdown-usuario {
+  color: black !important;
+}
+
+.mdi-apps {
+  cursor: pointer !important;
+}
+
+h6 {
+  color: #4d83ff !important;
+}
+
+.v-stepper__step:hover {
+  cursor: pointer;
+}
+
+.v-application .dz-preview a {
+  color: #4d83ff !important;
+}
+
+.v-dialog {
+  z-index: 30;
+}
+
+.dropzone {
+  border: 2px dashed #4d83ff;
+  border-radius: 5px;
+  background: white;
+}
+
+.dropzone.dz-drag-hover {
+  border: 2px solid #4d83ff;
+}
+
+.dropzone .dz-preview .dz-success-mark,
+.dropzone .dz-preview .dz-error-mark {
+  z-index: 20 !important;
+}
+
+.dz-details {
+  padding: 0px;
+}
+
+.dz-progress {
+  display: none;
+}
+
+.dropzone .dz-preview .dz-image {
+  width: 120px;
+  height: 120px;
+}
+
+.dropzone .dz-preview .dz-error-message {
+  top: 145px;
+  left: -10px;
+}
+
+.cropper-crop-box, .cropper-view-box {
+  border-radius: 50%;
+}
+
+.cropper-view-box {
+  box-shadow: 0 0 0 1px #39f;
+  outline: 0;
+}
+
+
+
+/* Inicio */
+.proyectos-card {
+  transition: all 0.5s ease !important;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+  cursor: pointer !important;
+}
+
+.v-responsive {
+  border: 1px solid rgba(77,130,255,0.4);
+}
+
+.proyectos-card.on-hover {
+  transform: scale(1.04) !important;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+#boton-nuevo-proyecto {
+  color: #4d83ff !important;
+  font-size: 6rem;
+  line-height: 6rem !important;
+}
+
+#form-datos-proyecto-nuevo {
+  display: block !important;
+  overflow-y: scroll !important;
+  min-height: 460px !important;
+  max-height: 460px !important;
+  height: 460px !important;
+  margin-bottom: 24px !important;
+  box-shadow: 0 0 0 0 !important;
+}
+
+#form-tecnicos-proyecto-nuevo {
+  display: block !important;
+  overflow-y: scroll !important;
+  min-height: 460px !important;
+  max-height: 460px !important;
+  height: 460px !important;
+  margin-bottom: 24px !important;
+  box-shadow: 0 0 0 0 !important;
+}
+
+#form-foto-proyecto-nuevo {
+  display: block !important;
+  overflow-y: scroll !important;
+  min-height: 460px !important;
+  max-height: 460px !important;
+  height: 460px !important;
+  margin-bottom: 24px !important;
+  box-shadow: 0 0 0 0 !important;
+}
+
+.boton-eliminar-invitacion-tecnico {
+  font-size: 2rem;
+}
+
+.boton-eliminar-invitacion-tecnico:hover {
+  font-size: 2rem;
+  color: #4d83ff;
+  cursor: pointer;
+}
+
+#boton-agregar-invitacion-tecnico {
+  font-size: 1.25rem;
+}
+
+#boton-agregar-invitacion-tecnico:hover {
+  font-size: 1.25rem;
+  color: #4d83ff;
+  cursor: pointer;
+}
+
+.dropify-wrapper {
+  background-repeat: repeat !important;
+}
+
+
+
+/* Tareas */
+#tareas {
+  display: block !important;
+  overflow-y: scroll !important;
+  max-height: 100% !important;
+  min-height: 100% !important;
+  height: 100% !important;
+}
+
+#tareas li {
+  max-width: 99% !important;
+}
+
+.tareas-label {
+  display: block !important;
+  overflow-x: scroll !important;
+  max-width: 100% !important;
+  min-width: 100% !important;
+  width: 100% !important;
+  white-space: nowrap !important;
+  text-overflow: unset !important;
+}

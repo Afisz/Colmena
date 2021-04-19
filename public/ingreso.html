@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Ingreso | Colmena</title>
+  <link rel="stylesheet" href="vendors/mdi/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="styles/style.css">
+  <link rel="stylesheet" href="styles/ingreso.css">
+  <link rel="shortcut icon" href="images/favicon.png" />
+</head>
+
+<body class="sidebar-toggle-display sidebar-hidden">
+
+  <!--Container scroller-->
+  <div id="vmIngreso" class="container-scroller">
+
+    <div class="container-fluid page-body-wrapper full-page-wrapper">
+      <div class="content-wrapper d-flex align-items-center auth px-0">
+        <div class="row w-100 mx-0">
+          <div class="col-11 col-sm-8 col-md-6 col-lg-4 mx-auto">
+            <div class="auth-form-light text-left py-5 px-4 px-sm-5">
+              <div class="brand-logo">
+                <img src="images/logo.png" alt="logo">
+              </div>
+              <h4>¡Hola! Empecemos...</h4>
+              <h6 class="font-weight-light">Logueate o registrate a través de Google.</h6>
+              <form id="sign-in-form" class="pt-3">
+                <div class="row justify-content-center mt-3">
+                  <div clas="col">
+                    <div id="sign-in-button-google" class="google-btn" v-on:click="signInButtonGoogle">
+                      <div class="google-icon-wrapper">
+                        <img class="google-icon" src="images/logo-google.svg"/>
+                      </div>
+                      <p class="btn-text"><b>Ingresar con Google</b></p>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- update the version number as needed -->
+  <script defer src="/__/firebase/8.2.7/firebase-app.js"></script>
+  <!-- include only the Firebase features as you need -->
+  <script defer src="/__/firebase/8.2.7/firebase-auth.js"></script>
+  <script defer src="/__/firebase/8.2.7/firebase-firestore.js"></script>
+  <script defer src="/__/firebase/8.2.7/firebase-functions.js"></script>
+  <!-- 
+    initialize the SDK after all desired features are loaded, set useEmulator to false
+    to avoid connecting the SDK to running emulators.
+  -->
+  <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+
+  <!--Dependencias JS-->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  
+  <!--  Propios-->
+  <script defer src="scripts/ingreso.js"></script>
+</body>
+
+</html>
