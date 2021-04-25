@@ -8,6 +8,7 @@ import {Tarea} from "./tarea";
 
 ("use strict");
 
+// Tecnico Interface
 export interface Tecnico {
   consentimientoDatos: boolean;
   datos: {
@@ -40,6 +41,7 @@ export interface Tecnico {
   tareas: Array<Tarea>;
 }
 
+// Productora Interface
 export interface Productora {
   consentimientoDatos: boolean;
   datos: {
@@ -59,42 +61,80 @@ export interface Productora {
   tareas: Array<Tarea>;
 }
 
+// Usuarios Router
 export const usuariosRouter = express.Router();
 
 // Crea un nuevo tecnico con el primer logueo de Google
-export const creacionTecnico = functions.auth.user().onCreate((user) => {
-  const nuevoTecnico: Tecnico = {
-    consentimientoDatos: false,
-    datos: {
-      apellido: "",
-      codigoArea: "",
-      cuil: "",
-      datosBancarios: {
-        banco: "",
-        cbu: "",
-        numeroCuenta: "",
-        tipoCuenta: "",
+export const creacionTecnico = functions.auth.user().onCreate(async (user) => {
+  const snapshot = await db.collection("tecnicosInvitados").where("email", "==", user.email).get();
+  if (snapshot.empty) {
+    const nuevoTecnico: Tecnico = {
+      consentimientoDatos: false,
+      datos: {
+        apellido: "",
+        codigoArea: "",
+        cuil: "",
+        datosBancarios: {
+          banco: "",
+          cbu: "",
+          numeroCuenta: "",
+          tipoCuenta: "",
+        },
+        direccion: "",
+        dni: "",
+        email: user.email,
+        fechaNacimiento: "",
+        nacionalidad: "",
+        nombre: "",
+        obraSocial: "",
+        sat: false,
+        sica: false,
+        telefono: "",
       },
-      direccion: "",
-      dni: "",
-      email: user.email,
-      fechaNacimiento: "",
-      nacionalidad: "",
-      nombre: "",
-      obraSocial: "",
-      sat: false,
-      sica: false,
-      telefono: "",
-    },
-    foto: user.photoURL,
-    invitacionesProyectos: [],
-    isProductora: false,
-    isTecnico: true,
-    nuevoUsuario: true,
-    proyectos: [],
-    tareas: [],
-  };
-  return db.doc("usuarios/" + user.uid).set(nuevoTecnico);
+      foto: user.photoURL,
+      invitacionesProyectos: [],
+      isProductora: false,
+      isTecnico: true,
+      nuevoUsuario: true,
+      proyectos: [],
+      tareas: [],
+    };
+    return db.doc(`usuarios/${user.uid}`).set(nuevoTecnico);
+  } else {
+    const nuevoTecnico: Tecnico = {
+      consentimientoDatos: false,
+      datos: {
+        apellido: "",
+        codigoArea: "",
+        cuil: "",
+        datosBancarios: {
+          banco: "",
+          cbu: "",
+          numeroCuenta: "",
+          tipoCuenta: "",
+        },
+        direccion: "",
+        dni: "",
+        email: user.email,
+        fechaNacimiento: "",
+        nacionalidad: "",
+        nombre: "",
+        obraSocial: "",
+        sat: false,
+        sica: false,
+        telefono: "",
+      },
+      foto: user.photoURL,
+      invitacionesProyectos: snapshot.docs[0].data().proyectos,
+      isProductora: false,
+      isTecnico: true,
+      nuevoUsuario: true,
+      proyectos: [],
+      tareas: [],
+    };
+    await db.doc(`usuarios/${user.uid}`).set(nuevoTecnico);
+    return db.doc(`tecnicosInvitados/${snapshot.docs[0].id}`).delete();
+  }
 });
 
 // Get Inicio - Mis Datos
@@ -102,7 +142,7 @@ usuariosRouter.get("/:id", (req: any, res: any) => {
   if (req.user.uid !== req.params.id) {
     return res.status(403).json({Error: "Unauthorized"});
   }
-  db.doc("usuarios/" + req.user.uid)
+  db.doc(`usuarios/${req.user.uid}`)
     .get()
     .then((doc) => {
       return res.status(200).json(doc.data());
@@ -126,14 +166,15 @@ usuariosRouter.put("/:id", (req: any, res: any, next) => {
     }
 
     const data = JSON.parse(fields.data);
-    var publicImagePath = "";
 
     if (files.imagen) {
-      const imagePath = "usuarios/" + req.user.uid + "/" + files.imagen.name;
+      const imagePath = `usuarios/${req.user.uid}/${files.imagen.name}`;
       const uuid = uuidv4();
+      const promises: Array<any> = [];
+      const publicImagePath = createPersistentDownloadUrl(bucket.name, imagePath, uuid);
 
-      bucket
-        .upload(files.imagen.path, {
+      promises.push(
+        bucket.upload(files.imagen.path, {
           destination: imagePath,
           metadata: {
             metadata: {
@@ -141,71 +182,57 @@ usuariosRouter.put("/:id", (req: any, res: any, next) => {
             },
           },
         })
+      );
+
+      if (data.isTecnico) {
+        promises.push(
+          db.doc(`usuarios/${req.user.uid}`).update({
+            "consentimientoDatos": data.consentimientoDatos,
+            "datos.apellido": data.datos.apellido,
+            "datos.telefono": data.datos.telefono,
+            "datos.codigoArea": data.datos.codigoArea,
+            "datos.cuil": data.datos.cuil,
+            "datos.datosBancarios.banco": data.datos.datosBancarios.banco,
+            "datos.datosBancarios.cbu": data.datos.datosBancarios.cbu,
+            "datos.datosBancarios.numeroCuenta": data.datos.datosBancarios.numeroCuenta,
+            "datos.datosBancarios.tipoCuenta": data.datos.datosBancarios.tipoCuenta,
+            "datos.direccion": data.datos.direccion,
+            "datos.dni": data.datos.dni,
+            "datos.fechaNacimiento": data.datos.fechaNacimiento,
+            "datos.nacionalidad": data.datos.nacionalidad,
+            "datos.nombre": data.datos.nombre,
+            "datos.obraSocial": data.datos.obraSocial,
+            "datos.sat": data.datos.sat,
+            "datos.sica": data.datos.sica,
+            "foto": publicImagePath,
+            "nuevoUsuario": data.nuevoUsuario,
+          })
+        );
+      } else if (data.isProductora) {
+        promises.push(
+          db.doc(`usuarios/${req.user.uid}`).update({
+            "consentimientoDatos": data.consentimientoDatos,
+            "datos.telefono": data.datos.telefono,
+            "datos.codigoArea": data.datos.codigoArea,
+            "datos.cuit": data.datos.cuit,
+            "datos.direccion": data.datos.direccion,
+            "datos.nombre": data.datos.nombre,
+            "datos.razonSocial": data.datos.razonSocial,
+            "foto": publicImagePath,
+            "nuevoUsuario": data.nuevoUsuario,
+          })
+        );
+      } else {
+        return res.status(404).json({Error: "Foto cargada pero usuario no encontrado."});
+      }
+
+      Promise.all(promises)
         .then(() => {
           fs.unlinkSync(files.imagen.path);
-          publicImagePath = createPersistentDownloadUrl(bucket.name, imagePath, uuid);
-
-          if (data.isTecnico) {
-            return db
-              .doc("usuarios/" + req.user.uid)
-              .update({
-                "consentimientoDatos": data.consentimientoDatos,
-                "datos.apellido": data.datos.apellido,
-                "datos.telefono": data.datos.telefono,
-                "datos.codigoArea": data.datos.codigoArea,
-                "datos.cuil": data.datos.cuil,
-                "datos.datosBancarios.banco": data.datos.datosBancarios.banco,
-                "datos.datosBancarios.cbu": data.datos.datosBancarios.cbu,
-                "datos.datosBancarios.numeroCuenta": data.datos.datosBancarios.numeroCuenta,
-                "datos.datosBancarios.tipoCuenta": data.datos.datosBancarios.tipoCuenta,
-                "datos.direccion": data.datos.direccion,
-                "datos.dni": data.datos.dni,
-                "datos.fechaNacimiento": data.datos.fechaNacimiento,
-                "datos.nacionalidad": data.datos.nacionalidad,
-                "datos.nombre": data.datos.nombre,
-                "datos.obraSocial": data.datos.obraSocial,
-                "datos.sat": data.datos.sat,
-                "datos.sica": data.datos.sica,
-                "foto": publicImagePath,
-                "nuevoUsuario": data.nuevoUsuario,
-              })
-              .then(() => {
-                return res.status(200).json({
-                  id: req.params.id,
-                  img: publicImagePath,
-                });
-              })
-              .catch((error) => {
-                fs.unlinkSync(files.imagen.path);
-                return res.status(500).json({Error: error});
-              });
-          } else if (data.isProductora) {
-            return db
-              .doc("usuarios/" + req.user.uid)
-              .update({
-                "consentimientoDatos": data.consentimientoDatos,
-                "datos.telefono": data.datos.telefono,
-                "datos.codigoArea": data.datos.codigoArea,
-                "datos.cuit": data.datos.cuit,
-                "datos.direccion": data.datos.direccion,
-                "datos.nombre": data.datos.nombre,
-                "datos.razonSocial": data.datos.razonSocial,
-                "foto": publicImagePath,
-                "nuevoUsuario": data.nuevoUsuario,
-              })
-              .then(() => {
-                return res.status(200).json({
-                  id: req.params.id,
-                  img: publicImagePath,
-                });
-              })
-              .catch((error) => {
-                fs.unlinkSync(files.imagen.path);
-                return res.status(500).json({Error: error});
-              });
-          } else {
-            return res.status(404).json({Error: "Foto cargada pero usuario no encontrado."});
-          }
+          return res.status(200).json({
+            id: req.params.id,
+            img: publicImagePath,
+          });
         })
         .catch((error) => {
           fs.unlinkSync(files.imagen.path);
@@ -214,7 +241,7 @@ usuariosRouter.put("/:id", (req: any, res: any, next) => {
     } else {
       if (data.isTecnico) {
         return db
-          .doc("usuarios/" + req.user.uid)
+          .doc(`usuarios/${req.user.uid}`)
           .update({
             "consentimientoDatos": data.consentimientoDatos,
             "datos.apellido": data.datos.apellido,
@@ -243,7 +270,7 @@ usuariosRouter.put("/:id", (req: any, res: any, next) => {
           });
       } else if (data.isProductora) {
         return db
-          .doc("usuarios/" + req.user.uid)
+          .doc(`usuarios/${req.user.uid}`)
           .update({
             "consentimientoDatos": data.consentimientoDatos,
             "datos.telefono": data.datos.telefono,

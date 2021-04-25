@@ -11,18 +11,25 @@ h6 {
   color: #4d83ff !important;
 }
 
+
+/* Vuetify */
 .v-stepper__step:hover {
   cursor: pointer;
-}
-
-.v-application .dz-preview a {
-  color: #4d83ff !important;
 }
 
 .v-dialog {
   z-index: 30;
 }
 
+.v-dialog:not(.v-dialog--fullscreen) {
+  max-height: 85%;
+}
+
+.v-responsive {
+  border: 1px solid rgba(77,130,255,0.4);
+}
+
+/* Dropzone JS */
 .dropzone {
   border: 2px dashed #4d83ff;
   border-radius: 5px;
@@ -46,6 +53,10 @@ h6 {
   display: none;
 }
 
+.v-application .dz-preview a {
+  color: #4d83ff !important;
+}
+
 .dropzone .dz-preview .dz-image {
   width: 120px;
   height: 120px;
@@ -56,6 +67,7 @@ h6 {
   left: -10px;
 }
 
+/* Cropper JS */
 .cropper-crop-box, .cropper-view-box {
   border-radius: 50%;
 }
@@ -72,10 +84,6 @@ h6 {
   transition: all 0.5s ease !important;
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
   cursor: pointer !important;
-}
-
-.v-responsive {
-  border: 1px solid rgba(77,130,255,0.4);
 }
 
 .proyectos-card.on-hover {
@@ -139,8 +147,25 @@ h6 {
   cursor: pointer;
 }
 
-.dropify-wrapper {
-  background-repeat: repeat !important;
+#card-editor-imagen {
+  height: 647px;
+  padding-top: 28px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+#editor-imagen {
+  height: 483px;
+  width: 852px;
+  background-color: black;
+}
+
+#botones-editor-imagen {
+  width: 852px;
+}
+
+.fondo-texto-card-proyectos {
+  background-color: rgb(0, 0, 0, 0.6);
 }
 
 

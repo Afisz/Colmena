@@ -5,7 +5,8 @@ var vmInicio = Vue.component('inicio', {
     return {
       // Ayudas varias
       dialog: false,
-      actualizando: false,
+      dialogEditor: false,
+      creando: false,
       pasoProyecto: 1,
       formDatosValidation: true,
       formTecnicosValidation: true,
@@ -29,6 +30,12 @@ var vmInicio = Vue.component('inicio', {
           permisos: []
         }
       ],
+      // Formulario fotos
+      usaLogoActual: false,
+      logoProductoraProyecto: null,
+      portadaProyecto: null,
+      myDropzoneLogo: null,
+      myDropzonePortada: null,
       // Reglas formularios
       rules: {
         reglasCuit: v => v == null || v.length >= 13 || v.length == 0 || 'El C.U.I.T. debe tener 11 dígitos',
@@ -44,9 +51,12 @@ var vmInicio = Vue.component('inicio', {
       this.razonSocialProyectoNuevo = this.razonSocialProductora;
       this.cuitProyectoNuevo = this.cuitProductora;
       this.direccionProyectoNuevo = this.direccionProductora;
+      this.inicializacionDropzone();
     },
     // Post proyecto nuevo
     crearProyecto: function () {
+      document.getElementById('boton-crear-proyecto').disabled = true;
+      this.creando = true;
       let _this = this;
       var datos = {
         datos: {
@@ -58,20 +68,28 @@ var vmInicio = Vue.component('inicio', {
           razonSocial: this.razonSocialProyectoNuevo,
           sigla: this.siglaProyectoNuevo,
         },
-        tipoProyecto: this.tipoProyectoNuevo
+        tipoProyecto: this.tipoProyectoNuevo,
+        logoProductora: this.usaLogoActual ? this.logoProductora : '',
+        tecnicosInvitados: this.tecnicosNuevos
       };
+      var formData = new FormData();
+      formData.append("data", JSON.stringify(datos));
+      if (this.logoProductoraProyecto) {
+        formData.append("logo", this.logoProductoraProyecto, 'logo-productora-proyecto.png');
+      }
+      if (this.portadaProyecto) {
+        formData.append("portada", this.portadaProyecto, 'portada-proyecto.png');
+      }
       firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
           user.getIdToken()
             .then(function (token) {
               fetch('https://us-central1-colmena-cac87.cloudfunctions.net/webApi/proyectos', {
                 method: 'POST',
-                headers: {'Authorization': 'Bearer ' + token},
-                body: JSON.stringify(datos)
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: formData
               })
-                .then(response => {
-                  return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                   store.commit('POST_PROYECTO_PRODUCTORA', {
                     director: datos.datos.director,
@@ -79,8 +97,29 @@ var vmInicio = Vue.component('inicio', {
                     nombre: datos.datos.nombre,
                     productora: datos.datos.productora,
                     tipoProyecto: datos.tipoProyecto,
+                    foto: data.portada
                   });
+                  _this.creando = false;
+                  document.getElementById('boton-crear-proyecto').disabled = false;
+                  _this.$refs.formDatos.resetValidation();
+                  _this.$refs.formTecnicos.resetValidation();
+                  _this.$refs.formFoto.resetValidation();
                   _this.dialog = false;
+                  _this.pasoProyecto = 1;
+                  _this.nombreProyectoNuevo = '';
+                  _this.siglaProyectoNuevo = '';
+                  _this.directorProyectoNuevo = '';
+                  _this.tipoProyectoNuevo = '';
+                  _this.tecnicosNuevos = [
+                    {
+                      email: '',
+                      area: '',
+                      puesto: '',
+                      permisos: []
+                    }
+                  ];
+                  _this.myDropzonePortada.removeAllFiles(true);
+                  _this.myDropzoneLogo.removeAllFiles(true);
                   _this.$toast.open({
                     message: "Proyecto creado.",
                     type: "success"
@@ -88,6 +127,8 @@ var vmInicio = Vue.component('inicio', {
                   console.log(data);
                 })
                 .catch(function (error) {
+                  _this.creando = false;
+                  document.getElementById('boton-crear-proyecto').disabled = false;
                   _this.$toast.open({
                     message: error.message,
                     type: "error"
@@ -96,6 +137,8 @@ var vmInicio = Vue.component('inicio', {
                 })
             })
             .catch(function (error) {
+              _this.creando = false;
+              document.getElementById('boton-crear-proyecto').disabled = false;
               _this.$toast.open({
                 message: error.message,
                 type: "error"
@@ -117,12 +160,12 @@ var vmInicio = Vue.component('inicio', {
         puesto: '',
         permisos: []
       });
-      setTimeout(function() {
+      setTimeout(function () {
         document.getElementById('form-tecnicos-proyecto-nuevo').scrollBy({
           top: 246,
           behaviour: 'smooth'
         });
-        }, 100);
+      }, 100);
     },
     cancelarProyectoNuevo: function () {
       this.dialog = false;
@@ -133,32 +176,251 @@ var vmInicio = Vue.component('inicio', {
       this.tipoProyectoNuevo = '';
       this.tecnicosNuevos = [
         {
-        email: '',
-        area: '',
-        puesto: '',
-        permisos: []
+          email: '',
+          area: '',
+          puesto: '',
+          permisos: []
         }
       ];
+      this.myDropzonePortada.removeAllFiles(true);
+      this.myDropzoneLogo.removeAllFiles(true);
       this.$refs.formDatos.resetValidation();
       this.$refs.formTecnicos.resetValidation();
-      this.$refs.formConsentimiento.resetValidation();
+      this.$refs.formFoto.resetValidation();
     },
-    siguienteFilminaProyectoNuevo: function (seccion) {
-      this.pasoProyecto++;
-      if (seccion == 'datos') {
+    siguienteFilminaProyectoNuevo: function (paso) {
+      this.pasoProyecto = paso + 1;
+      if (paso == 1) {
         this.$refs.formDatos.validate();
-      } else if (seccion == 'tecnicos') {
+      } else if (paso == 2) {
+        this.$refs.formDatos.validate();
         this.$refs.formTecnicos.validate();
       }
     },
     filtroPuestos: function (index) {
       this.listaPuestos = Object.keys(this.areasPuestosSueldos[this.tecnicosNuevos[index].area]);
+    },
+    inicializacionDropzone: function () {
+      var _this = this;
+
+      var intervalDropzoneLogo = setInterval(function () {
+        try {
+          _this.myDropzoneLogo = new Dropzone("div#logo-upload", {
+            url: "/file/post",
+            maxFilesize: 0.5,
+            maxFiles: 1,
+            acceptedFiles: '.png, .jpg, .jpeg',
+            addRemoveLinks: true,
+            dictDefaultMessage: 'Tirá acá el logo de la productora (únicamente .PNG o .JPEG)',
+            dictFileTooBig: 'El archivo es demasiado grande ({{filesize}}Mb). Tamaño máx.: {{maxFilesize}}Mb.',
+            dictInvalidFileType: 'Tipo de archivo inválido (solo se acepta .PNG o .JPEG).',
+            dictRemoveFile: 'Quitar archivo',
+            dictMaxFilesExceeded: 'Solo podés cargar un archivo.',
+            transformFile: function (file, done) {
+              // Crea una referencia de Dropzone
+              var myDropZone = this;
+
+              // Crea un nodo de imagen para Cropper.js
+              var image = new Image();
+              image.style.display = 'block';
+              image.style.maxWidth = '100%';
+              image.src = URL.createObjectURL(file);
+
+              // Abre el modal
+              _this.dialogEditor = true;
+
+              //Inicializa el editor de imagen
+              var intervalEditorImagen = setInterval(function () {
+                try {
+                  var editor = document.getElementById('editor-imagen');
+
+                  // Inicia Cropper.js
+                  var cropper = new Cropper(image, {
+                    aspectRatio: 1,
+                    highlight: false,
+                    zoomable: true,
+                    dragMode: 'move'
+                  });
+
+                  // Botón confirmar
+                  var buttonConfirm = document.getElementById('confirmar-edicion-imagen');
+                  buttonConfirm.addEventListener('click', function () {
+                    // Inicializa el canvas con data de Cropper JS
+                    var canvas = cropper.getCroppedCanvas({
+                      width: 256,
+                      height: 256,
+                    });
+                    // Convierte el canvas en un Blob
+                    canvas.toBlob(function (blob) {
+                      // Crea un nuevo archivo de vista previa de Dropzone
+                      myDropZone.createThumbnail(
+                        blob,
+                        myDropZone.options.thumbnailWidth,
+                        myDropZone.options.thumbnailHeight,
+                        myDropZone.options.thumbnailMethod,
+                        false,
+                        function (dataURL) {
+
+                          // Actualiza la vista previa de Dropzone
+                          myDropZone.emit('thumbnail', file, dataURL);
+                          // Return the file to Dropzone
+                          _this.logoProductoraProyecto = blob;
+                          done(blob);
+                        });
+                    });
+
+                    // Sale del editor de imágen
+                    _this.usaLogoActual = false;
+                    _this.dialogEditor = false;
+                    editor.innerHTML = '';
+                  });
+
+                  // Botón cancelar
+                  var buttonCancel = document.getElementById('cancelar-edicion-imagen');
+                  buttonCancel.addEventListener('click', function () {
+
+                    // Sale del editor de imágen
+                    _this.dialogEditor = false;
+                    editor.innerHTML = '';
+                    _this.logoProductoraProyecto = null;
+                    myDropZone.removeAllFiles(true);
+                    return;
+                  });
+
+                  editor.appendChild(image);
+
+                  clearInterval(intervalEditorImagen);
+                } catch {
+                }
+              }, 10);
+            },
+            removedfile: function (file) {
+              if (file.status == 'success') {
+                _this.logoProductoraProyecto = null;
+              }
+              file.previewElement.remove();
+            },
+          });
+          clearInterval(intervalDropzoneLogo);
+        } catch {
+        }
+      }, 10);
+
+      var intervalDropzonePortada = setInterval(function () {
+        try {
+          _this.myDropzonePortada = new Dropzone("div#portada-proyecto-upload", {
+            url: "/file/post",
+            maxFilesize: 1,
+            maxFiles: 1,
+            acceptedFiles: '.png, .jpg, .jpeg',
+            addRemoveLinks: true,
+            dictDefaultMessage: 'Tirá acá la portada del proyecto (únicamente .PNG o .JPEG)',
+            dictFileTooBig: 'El archivo es demasiado grande ({{filesize}}Mb). Tamaño máx.: {{maxFilesize}}Mb.',
+            dictInvalidFileType: 'Tipo de archivo inválido (solo se acepta .PNG o .JPEG).',
+            dictRemoveFile: 'Quitar archivo',
+            dictMaxFilesExceeded: 'Solo podés cargar un archivo.',
+            transformFile: function (file, done) {
+              // Crea una referencia de Dropzone
+              var myDropZone = this;
+
+              // Crea un nodo de imagen para Cropper.js
+              var image = new Image();
+              image.style.display = 'block';
+              image.style.maxWidth = '100%';
+              image.src = URL.createObjectURL(file);
+
+              // Abre el modal
+              _this.dialogEditor = true;
+
+              //Inicializa el editor de imagen
+              var intervalEditorImagen = setInterval(function () {
+                try {
+                  var editor = document.getElementById('editor-imagen');
+
+                  // Inicia Cropper.js
+                  var cropper = new Cropper(image, {
+                    aspectRatio: 1,
+                    highlight: false,
+                    zoomable: true,
+                    dragMode: 'move'
+                  });
+
+                  // Botón confirmar
+                  var buttonConfirm = document.getElementById('confirmar-edicion-imagen');
+                  buttonConfirm.addEventListener('click', function () {
+                    // Inicializa el canvas con data de Cropper JS
+                    var canvas = cropper.getCroppedCanvas({
+                      width: 512,
+                      height: 512,
+                      fillColor: '#000000'
+                    });
+                    // Convierte el canvas en un Blob
+                    canvas.toBlob(function (blob) {
+                      // Crea un nuevo archivo de vista previa de Dropzone
+                      myDropZone.createThumbnail(
+                        blob,
+                        myDropZone.options.thumbnailWidth,
+                        myDropZone.options.thumbnailHeight,
+                        myDropZone.options.thumbnailMethod,
+                        false,
+                        function (dataURL) {
+
+                          // Actualiza la vista previa de Dropzone
+                          myDropZone.emit('thumbnail', file, dataURL);
+                          // Return the file to Dropzone
+                          _this.portadaProyecto = blob;
+                          done(blob);
+                        });
+                    });
+
+                    // Sale del editor de imágen
+                    _this.dialogEditor = false;
+                    editor.innerHTML = '';
+                  });
+
+                  // Botón cancelar
+                  var buttonCancel = document.getElementById('cancelar-edicion-imagen');
+                  buttonCancel.addEventListener('click', function () {
+
+                    // Sale del editor de imágen
+                    _this.dialogEditor = false;
+                    editor.innerHTML = '';
+                    _this.portadaProyecto = null;
+                    myDropZone.removeAllFiles(true);
+                    return;
+                  });
+
+                  editor.appendChild(image);
+
+                  clearInterval(intervalEditorImagen);
+                } catch {
+                }
+              }, 10);
+            },
+            removedfile: function (file) {
+              if (file.status == 'success') {
+                _this.portadaProyecto = null;
+              }
+              file.previewElement.remove();
+            },
+          });
+          clearInterval(intervalDropzonePortada);
+        } catch {
+        }
+      }, 10);
+    },
+    usaLogoActualCambio: function () {
+      if (this.usaLogoActual == true) {
+        this.myDropzoneLogo.removeAllFiles(true);
+        this.logoProductoraProyecto = this.logoProductora;
+      }
     }
   },
   store,
   computed: Vuex.mapState({
     // Datos Técnico
     proyectosTecnico: state => state.tecnico.proyectos,
+    invitacionesProyectos: state => state.tecnico.invitacionesProyectos,
 
     // Datos Productora
     proyectosProductora: state => state.productora.proyectos,
@@ -166,6 +428,7 @@ var vmInicio = Vue.component('inicio', {
     razonSocialProductora: state => state.productora.datos.razonSocial,
     cuitProductora: state => state.productora.datos.cuit,
     direccionProductora: state => state.productora.datos.direccion,
+    logoProductora: state => state.productora.foto,
 
     // Datos Globales
     isTecnico: state => state.isTecnico,
@@ -174,38 +437,122 @@ var vmInicio = Vue.component('inicio', {
     areasPuestosSueldos: state => state.globales.areasPuestosSueldos,
     listaAreas: state => Object.keys(state.globales.areasPuestosSueldos),
     listaPermisos: state => state.globales.permisos,
-    completeFormValidation: function() {return this.formDatosValidation && this.formTecnicosValidation && this.formFotoValidation;},
+    completeFormValidation: function () { return this.formDatosValidation && this.formTecnicosValidation && this.formFotoValidation; },
   }),
   template:
     `<div class="col-12 stretch-card">
     <div class="card">
       <div class="card-body">
         <div v-if="isTecnico">
-          <h6 class="font-weight-bold mb-3">MIS PROYECTOS</h6>
-          <v-divider></v-divider>
-          <div class="row">
-            <div v-for="(proyecto, index) in proyectosTecnico" class="col-md-3">
-              <v-hover v-slot="{hover}">
-                <v-card
-                  class="proyectos-card bg-light"
-                  :class="{'on-hover': hover}"
-                >
-                  <v-responsive :aspect-ratio="4/4">
-                    <v-card-text>
-                      <h4 class="text-muted">{{proyecto.productora}}</h4>
-                      <h3 class="nombre-episodio-tarjetas">
-                        {{proyecto.nombre}}
-                      </h3>
-                      <hr />
-                      <div class="text-muted">
-                        <span>Dir.: {{proyecto.director}}</span>
-                      </div>
-                    </v-card-text>
-                  </v-responsive>
-                </v-card>
-              </v-hover>
+          <template v-if="invitacionesProyectos.length == 0">
+            <h6 class="font-weight-bold mb-3">MIS PROYECTOS</h6>
+            <v-divider></v-divider>
+            <div class="row">
+              <div v-for="(proyecto, index) in proyectosTecnico" class="col-md-3">
+                <v-hover v-slot="{hover}">
+                  <v-card class="proyectos-card bg-light" :class="{'on-hover': hover}">
+                    <template v-if="proyecto.foto != ''">
+                      <v-img class="white--text align-end" height="100%" v-bind:src="proyecto.foto">
+                        <v-responsive :aspect-ratio="4/4">
+                          <v-card-text>
+                            <h4><span class="fondo-texto-card-proyectos">{{proyecto.productora}}</span></h4>
+                            <h3 class="nombre-episodio-tarjetas"><span class="fondo-texto-card-proyectos">{{proyecto.nombre}}</span></h3>
+                            <div><span class="fondo-texto-card-proyectos">Dir.: {{proyecto.director}}</span></div>
+                          </v-card-text>
+                        </v-responsive>
+                      </v-img>
+                    </template>
+                    <template v-else-if="proyecto.foto == ''">
+                      <v-responsive :aspect-ratio="4/4">
+                        <v-card-text>
+                          <h4 class="text-muted">{{proyecto.productora}}</h4>
+                          <h3 class="nombre-episodio-tarjetas">{{proyecto.nombre}}</h3>
+                          <hr />
+                          <div>
+                            <span class="text-muted">Dir.: {{proyecto.director}}</span>
+                          </div>
+                        </v-card-text>
+                      </v-responsive>
+                    </template>
+                  </v-card>
+                </v-hover>
+              </div>
             </div>
-          </div>
+          </template>
+          <template v-else-if="invitacionesProyectos.length > 0">
+            <div class="row">
+              <div class="col-md-3">
+                <h6 class="font-weight-bold mb-3">INVITACIONES</h6>
+                <v-divider></v-divider>
+                <div class="row">
+                  <div v-for="(proyecto, index) in invitacionesProyectos" class="col-md-12">
+                    <v-hover v-slot="{hover}">
+                      <v-card class="proyectos-card bg-light" :class="{'on-hover': hover}">
+                        <template v-if="proyecto.foto != ''">
+                          <v-img class="white--text align-end" height="100%" v-bind:src="proyecto.foto">
+                            <v-responsive :aspect-ratio="4/4">
+                              <v-card-text>
+                                <h4><span class="fondo-texto-card-proyectos">{{proyecto.productora}}</span></h4>
+                                <h3 class="nombre-episodio-tarjetas"><span class="fondo-texto-card-proyectos">{{proyecto.nombre}}</span></h3>
+                                <div><span class="fondo-texto-card-proyectos">Dir.: {{proyecto.director}}</span></div>
+                              </v-card-text>
+                            </v-responsive>
+                          </v-img>
+                        </template>
+                        <template v-else-if="proyecto.foto == ''">
+                          <v-responsive :aspect-ratio="4/4">
+                            <v-card-text>
+                              <h4 class="text-muted">{{proyecto.productora}}</h4>
+                              <h3 class="nombre-episodio-tarjetas">{{proyecto.nombre}}</h3>
+                              <hr />
+                              <div>
+                                <span class="text-muted">Dir.: {{proyecto.director}}</span>
+                              </div>
+                            </v-card-text>
+                          </v-responsive>
+                        </template>
+                      </v-card>
+                    </v-hover>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-9">
+                <h6 class="font-weight-bold mb-3">MIS PROYECTOS</h6>
+                <v-divider></v-divider>
+                <div class="row">
+                  <div v-for="(proyecto, index) in proyectosTecnico" class="col-md-4">
+                    <v-hover v-slot="{hover}">
+                      <v-card class="proyectos-card bg-light" :class="{'on-hover': hover}">
+                        <template v-if="proyecto.foto != ''">
+                          <v-img class="white--text align-end" height="100%" v-bind:src="proyecto.foto">
+                            <v-responsive :aspect-ratio="4/4">
+                              <v-card-text>
+                                <h4><span class="fondo-texto-card-proyectos">{{proyecto.productora}}</span></h4>
+                                <h3 class="nombre-episodio-tarjetas"><span class="fondo-texto-card-proyectos">{{proyecto.nombre}}</span></h3>
+                                <div><span class="fondo-texto-card-proyectos">Dir.: {{proyecto.director}}</span></div>
+                              </v-card-text>
+                            </v-responsive>
+                          </v-img>
+                        </template>
+                        <template v-else-if="proyecto.foto == ''">
+                          <v-responsive :aspect-ratio="4/4">
+                            <v-card-text>
+                              <h4 class="text-muted">{{proyecto.productora}}</h4>
+                              <h3 class="nombre-episodio-tarjetas">{{proyecto.nombre}}</h3>
+                              <hr />
+                              <div>
+                                <span class="text-muted">Dir.: {{proyecto.director}}</span>
+                              </div>
+                            </v-card-text>
+                          </v-responsive>
+                        </template>
+                      </v-card>
+                    </v-hover>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
         <div v-if="isProductora">
           <h6 class="font-weight-bold mb-3">PROYECTOS</h6>
@@ -215,21 +562,12 @@ var vmInicio = Vue.component('inicio', {
               <v-dialog v-model="dialog" persistent max-width="900px">
                 <template v-slot:activator="{ on, attrs }">
                   <v-hover v-slot="{hover}">
-                    <v-card
-                      v-bind="attrs"
-                      v-on="on"
-                      v-on:click="aperturaMenuProyectoNuevo"
-                      class="proyectos-card d-flex"
-                      :class="{'on-hover': hover}"
-                    >
+                    <v-card v-bind="attrs" v-on="on" v-on:click="aperturaMenuProyectoNuevo" class="proyectos-card d-flex" :class="{'on-hover': hover}">
                       <v-responsive :aspect-ratio="4/4">
                         <v-card-text class="h-100 d-flex align-items-center">
                           <div class="col">
                             <div class="row d-flex justify-content-center">
-                              <i
-                                id="boton-nuevo-proyecto"
-                                class="mdi mdi-plus"
-                              ></i>
+                              <i id="boton-nuevo-proyecto" class="mdi mdi-plus"></i>
                             </div>
                             <div class="row d-flex justify-content-center">
                               <h4 class="text-muted">Nuevo Proyecto</h4>
@@ -247,7 +585,7 @@ var vmInicio = Vue.component('inicio', {
                       :complete="pasoProyecto > 1 && formDatosValidation"
                       step="1"
                       :rules="[() => formDatosValidation]"
-                      v-on:click="pasoProyecto = 1"
+                      v-on:click="siguienteFilminaProyectoNuevo(0)"
                     >
                       DATOS
                     </v-stepper-step>
@@ -257,29 +595,19 @@ var vmInicio = Vue.component('inicio', {
                       :complete="pasoProyecto > 2 && formTecnicosValidation"
                       step="2"
                       :rules="[() => formTecnicosValidation]"
-                      v-on:click="pasoProyecto = 2"
+                      v-on:click="siguienteFilminaProyectoNuevo(1)"
                     >
                       TÉCNICOS Y PERMISOS
                     </v-stepper-step>
                     <v-divider></v-divider>
-                    <v-stepper-step
-                      color="#4d83ff"
-                      step="3"
-                      :rules="[() => formFotoValidation]"
-                      v-on:click="pasoProyecto = 3"
-                    >
+                    <v-stepper-step color="#4d83ff" step="3" :rules="[() => formFotoValidation]" v-on:click="siguienteFilminaProyectoNuevo(2)">
                       FOTO Y LOGO
                     </v-stepper-step>
                   </v-stepper-header>
                   <v-stepper-items>
                     <v-stepper-content step="1">
                       <v-card id="form-datos-proyecto-nuevo" class="mb-12">
-                        <v-form
-                          lazy-validation
-                          class="pt-3"
-                          v-model="formDatosValidation"
-                          ref="formDatos"
-                        >
+                        <v-form lazy-validation class="pt-3" v-model="formDatosValidation" ref="formDatos">
                           <div class="row w-100">
                             <div class="form-group col-12 col-md-6">
                               <v-text-field
@@ -290,12 +618,7 @@ var vmInicio = Vue.component('inicio', {
                               ></v-text-field>
                             </div>
                             <div class="form-group col-12 col-md-6">
-                              <v-text-field
-                                v-model="directorProyectoNuevo"
-                                label="Director/a"
-                                :rules="[rules.obligatorio]"
-                                clearable
-                              ></v-text-field>
+                              <v-text-field v-model="directorProyectoNuevo" label="Director/a" :rules="[rules.obligatorio]" clearable></v-text-field>
                             </div>
                           </div>
                           <div class="row w-100">
@@ -303,6 +626,7 @@ var vmInicio = Vue.component('inicio', {
                               <v-text-field
                                 v-model:value="siglaProyectoNuevo"
                                 label="Sigla del proyecto"
+                                v-mask="'AAAAAAAA'"
                                 :rules="[rules.obligatorio]"
                                 clearable
                               ></v-text-field>
@@ -345,12 +669,7 @@ var vmInicio = Vue.component('inicio', {
                               ></v-text-field>
                             </div>
                             <div class="form-group col-12 col-md-6">
-                              <v-text-field
-                                v-model="direccionProyectoNuevo"
-                                label="Dirección"
-                                :rules="[rules.obligatorio]"
-                                clearable
-                              ></v-text-field>
+                              <v-text-field v-model="direccionProyectoNuevo" label="Dirección" :rules="[rules.obligatorio]" clearable></v-text-field>
                             </div>
                           </div>
                         </v-form>
@@ -369,7 +688,7 @@ var vmInicio = Vue.component('inicio', {
                           <button
                             type="button"
                             class="btn btn-primary btn-block btn-lg font-weight-medium auth-form-btn"
-                            v-on:click="siguienteFilminaProyectoNuevo('datos')"
+                            v-on:click="siguienteFilminaProyectoNuevo(1)"
                           >
                             SIGUIENTE
                           </button>
@@ -379,19 +698,11 @@ var vmInicio = Vue.component('inicio', {
                     <v-stepper-content step="2">
                       <v-card id="form-tecnicos-proyecto-nuevo" class="mb-12">
                         <v-card-text class="px-0">
-                          Invite a sus primeros técnicos al proyecto. Indique el
-                          área, el puesto y los permisos que le dará a cada uno de
-                          ellos (podrá modificarlos luego). Recomendamos agregar
-                          por lo menos al/los encargado/s de las Altas de los
-                          técnicos para que le ayude a seguir invitando a otros
-                          técnicos y a manejar sus permisos.
+                          Invite a sus primeros técnicos al proyecto. Indique el área, el puesto y los permisos que le dará a cada uno de ellos (podrá
+                          modificarlos luego). Recomendamos agregar por lo menos al/los encargado/s de las Altas de los técnicos para que le ayude a
+                          seguir invitando a otros técnicos y a manejar sus permisos.
                         </v-card-text>
-                        <v-form
-                          lazy-validation
-                          class="pt-3"
-                          v-model="formTecnicosValidation"
-                          ref="formTecnicos"
-                        >
+                        <v-form lazy-validation class="pt-3" v-model="formTecnicosValidation" ref="formTecnicos">
                           <div v-for="(tecnico, index) in tecnicosNuevos">
                             <div class="row w-100">
                               <div class="col-11">
@@ -446,11 +757,8 @@ var vmInicio = Vue.component('inicio', {
                             </div>
                             <v-divider class="mt-0"></v-divider>
                           </div>
-                          <span
-                            id="boton-agregar-invitacion-tecnico"
-                            v-on:click="agregarNuevoUsuarioALaLista"
-                            ><i class="mdi mdi-account-plus btn-icon-prepend"></i>
-                            Agregar otro técnico</span
+                          <span id="boton-agregar-invitacion-tecnico" v-on:click="agregarNuevoUsuarioALaLista"
+                            ><i class="mdi mdi-account-plus btn-icon-prepend"></i> Agregar otro técnico</span
                           >
                         </v-form>
                       </v-card>
@@ -477,7 +785,7 @@ var vmInicio = Vue.component('inicio', {
                           <button
                             type="button"
                             class="btn btn-primary btn-block btn-lg font-weight-medium auth-form-btn"
-                            v-on:click="siguienteFilminaProyectoNuevo('tecnicos')"
+                            v-on:click="siguienteFilminaProyectoNuevo(2)"
                           >
                             SIGUIENTE
                           </button>
@@ -485,45 +793,27 @@ var vmInicio = Vue.component('inicio', {
                       </div>
                     </v-stepper-content>
                     <v-stepper-content step="3">
-                      <v-card
-                        id="form-foto-proyecto-nuevo"
-                        class="mb-12"
-                      >
-                        <v-form
-                          lazy-validation
-                          class="pt-3"
-                          v-model="formFotoValidation"
-                          ref="formConsentimiento"
-                        >
-                          <div class="row">
-                            <div class="form-group col-12 col-md-6">
-                              
+                      <v-card id="form-foto-proyecto-nuevo" class="mb-12">
+                        <v-form lazy-validation class="pt-3" v-model="formFotoValidation" ref="formFoto">
+                          <div class="row justify-content-center">
+                            <div class="form-group col-6 mt-3">
+                              <h6 class="font-weight-bold mb-3">LOGO DE LA PRODUCTORA PARA ESTE PROYECTO</h6>
+                              <v-divider></v-divider>
+                              <div id="logo-upload" class="dropzone"></div>
+                              <div class="form-check">
+                                <label class="form-check-label text-muted">
+                                  <div class="d-flex justify-content-left">
+                                    <input type="checkbox" class="form-control" v-model:value="usaLogoActual" v-on:change="usaLogoActualCambio" />
+                                    Usar el logo de la productora actualmente cargado
+                                    <i class="input-helper"></i>
+                                  </div>
+                                </label>
+                              </div>
                             </div>
-                            <div class="form-group col-12 col-md-6">
-                              <v-text-field
-                                v-model="directorProyectoNuevo"
-                                label="Director/a"
-                                :rules="[rules.obligatorio]"
-                                clearable
-                              ></v-text-field>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="form-group col-12 col-md-6">
-                              <v-text-field
-                                v-model:value="siglaProyectoNuevo"
-                                label="Sigla del proyecto"
-                                :rules="[rules.obligatorio]"
-                                clearable
-                              ></v-text-field>
-                            </div>
-                            <div class="form-group col-12 col-md-6">
-                              <v-select
-                                :items="listaTiposProyecto"
-                                v-model="tipoProyectoNuevo"
-                                label="Tipo de proyecto"
-                                :rules="[rules.obligatorio]"
-                              ></v-select>
+                            <div class="form-group col-6 mt-3">
+                              <h6 class="font-weight-bold mb-3">PORTADA DEL PROYECTO</h6>
+                              <v-divider></v-divider>
+                              <div id="portada-proyecto-upload" class="dropzone"></div>
                             </div>
                           </div>
                         </v-form>
@@ -549,26 +839,20 @@ var vmInicio = Vue.component('inicio', {
                         </div>
                         <div class="col-6">
                           <button
+                            id="boton-crear-proyecto"
                             type="button"
                             class="btn btn-block btn-lg font-weight-medium auth-form-btn"
+                            style="height: 48px; padding: 0px"
                             v-bind:class="{'btn-primary': completeFormValidation, 'btn-danger': !completeFormValidation}"
                             v-bind:disabled="!completeFormValidation"
                             v-on:click="crearProyecto"
                           >
-                            <div v-if="!actualizando && completeFormValidation">
-                              CREAR PROYECTO
-                            </div>
-                            <div v-if="actualizando && completeFormValidation">
-                              <span
-                                class="spinner-border spinner-border-sm"
-                                role="status"
-                                aria-hidden="true"
-                              ></span>
+                            <div v-if="!creando && completeFormValidation">CREAR PROYECTO</div>
+                            <div v-if="creando && completeFormValidation">
+                              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             </div>
                             <div v-if="!completeFormValidation">
-                              <i
-                                class="mdi mdi-close-octagon btn-icon-prepend"
-                              ></i>
+                              <i class="mdi mdi-close-octagon btn-icon-prepend"></i>
                               CORRIJA LOS ERRORES
                             </div>
                           </button>
@@ -579,27 +863,32 @@ var vmInicio = Vue.component('inicio', {
                 </v-stepper>
               </v-dialog>
             </div>
-            <div
-              v-for="(proyecto, index) in proyectosProductora"
-              class="col-md-3"
-            >
+            <div v-for="(proyecto, index) in proyectosProductora" class="col-md-3">
               <v-hover v-slot="{hover}">
-                <v-card
-                  class="proyectos-card bg-light"
-                  :class="{'on-hover': hover}"
-                >
-                  <v-responsive :aspect-ratio="4/4">
-                    <v-card-text>
-                      <h4 class="text-muted">{{proyecto.productora}}</h4>
-                      <h3 class="nombre-episodio-tarjetas">
-                        {{proyecto.nombre}}
-                      </h3>
-                      <hr />
-                      <div class="text-muted">
-                        <span>Dir.: {{proyecto.director}}</span>
-                      </div>
-                    </v-card-text>
-                  </v-responsive>
+                <v-card class="proyectos-card bg-light" :class="{'on-hover': hover}">
+                  <template v-if="proyecto.foto != ''">
+                    <v-img class="white--text align-end" height="100%" v-bind:src="proyecto.foto">
+                      <v-responsive :aspect-ratio="4/4">
+                        <v-card-text>
+                          <h4><span class="fondo-texto-card-proyectos">{{proyecto.productora}}</span></h4>
+                          <h3 class="nombre-episodio-tarjetas"><span class="fondo-texto-card-proyectos">{{proyecto.nombre}}</span></h3>
+                          <div><span class="fondo-texto-card-proyectos">Dir.: {{proyecto.director}}</span></div>
+                        </v-card-text>
+                      </v-responsive>
+                    </v-img>
+                  </template>
+                  <template v-else-if="proyecto.foto == ''">
+                    <v-responsive :aspect-ratio="4/4">
+                      <v-card-text>
+                        <h4 class="text-muted">{{proyecto.productora}}</h4>
+                        <h3 class="nombre-episodio-tarjetas">{{proyecto.nombre}}</h3>
+                        <hr />
+                        <div>
+                          <span class="text-muted">Dir.: {{proyecto.director}}</span>
+                        </div>
+                      </v-card-text>
+                    </v-responsive>
+                  </template>
                 </v-card>
               </v-hover>
             </div>
@@ -607,6 +896,26 @@ var vmInicio = Vue.component('inicio', {
         </div>
       </div>
     </div>
-  </div>
-  `
+    <v-dialog v-model="dialogEditor" persistent max-width="900px">
+      <v-card id="card-editor-imagen">
+        <h6 class="font-weight-bold mb-3">RECORTÁ TU IMAGEN (1:1)</h6>
+        <v-divider></v-divider>
+        <div class="row m-0">
+          <div id="editor-imagen"></div>
+        </div>
+        <div id="botones-editor-imagen" class="row justify-content-center mx-0">
+          <div class="col pl-0 pb-4">
+            <button id="cancelar-edicion-imagen" type="button" class="btn btn-secondary btn-block btn-lg font-weight-medium auth-form-btn">
+              CANCELAR
+            </button>
+          </div>
+          <div class="col pr-0 pb-4">
+            <button id="confirmar-edicion-imagen" type="button" class="btn btn-primary btn-block btn-lg font-weight-medium auth-form-btn">
+              CONFIRMAR
+            </button>
+          </div>
+        </div>
+      </v-card>
+    </v-dialog>
+  </div>`
 })

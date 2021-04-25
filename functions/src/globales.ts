@@ -3,6 +3,7 @@ import {db} from "./index";
 
 ("use strict");
 
+// Globales Router
 export const globalesRouter = express.Router();
 
 // Get Globales

@@ -200,7 +200,7 @@ var vmMisDatos = Vue.component('mis-datos', {
             url: "/file/post",
             maxFilesize: 0.5,
             maxFiles: 1,
-            acceptedFiles: '.png, .jpeg',
+            acceptedFiles: '.png, .jpg, .jpeg',
             addRemoveLinks: true,
             dictDefaultMessage: _this.mensajeInicialDropzone,
             dictFileTooBig: 'El archivo es demasiado grande ({{filesize}}Mb). Tamaño máx.: {{maxFilesize}}Mb.',
@@ -213,6 +213,8 @@ var vmMisDatos = Vue.component('mis-datos', {
 
               // Crea un nodo de imagen para Cropper.js
               var image = new Image();
+              image.style.display = 'block';
+              image.style.maxWidth = '100%';
               image.src = URL.createObjectURL(file);
 
               // Abre el modal
@@ -232,22 +234,16 @@ var vmMisDatos = Vue.component('mis-datos', {
                   });
 
                   // Botón confirmar
-                  var buttonConfirm = document.createElement('button');
-                  buttonConfirm.style.position = 'absolute';
-                  buttonConfirm.style.left = '10px';
-                  buttonConfirm.style.top = '50px';
-                  buttonConfirm.style.zIndex = 9999;
-                  buttonConfirm.style.color = 'white';
-                  buttonConfirm.textContent = 'Confirm';
+                  var buttonConfirm = document.getElementById('confirmar-edicion-imagen');
                   buttonConfirm.addEventListener('click', function () {
-                    // Get the canvas with image data from Cropper.js
+                    // Inicializa el canvas con data de Cropper JS
                     var canvas = cropper.getCroppedCanvas({
                       width: 256,
                       height: 256,
                     });
-                    // Turn the canvas into a Blob (file object without a name)
+                    // Convierte el canvas en un Blob
                     canvas.toBlob(function (blob) {
-                      // Create a new Dropzone file thumbnail
+                      // Crea un nuevo archivo de vista previa de Dropzone
                       myDropZone.createThumbnail(
                         blob,
                         myDropZone.options.thumbnailWidth,
@@ -256,7 +252,7 @@ var vmMisDatos = Vue.component('mis-datos', {
                         false,
                         function (dataURL) {
 
-                          // Update the Dropzone file thumbnail
+                          // Actualiza la vista previa de Dropzone
                           myDropZone.emit('thumbnail', file, dataURL);
                           // Return the file to Dropzone
                           _this.imagen = blob;
@@ -269,8 +265,19 @@ var vmMisDatos = Vue.component('mis-datos', {
                     editor.innerHTML = '';
                   });
 
+                  // Botón cancelar
+                  var buttonCancel = document.getElementById('cancelar-edicion-imagen');
+                  buttonCancel.addEventListener('click', function () {
+
+                    // Sale del editor de imágen
+                    _this.dialog = false;
+                    editor.innerHTML = '';
+                    _this.imagen = null;
+                    myDropZone.removeAllFiles(true);
+                    return;
+                  });
+
                   editor.appendChild(image);
-                  editor.appendChild(buttonConfirm);
 
                   clearInterval(intervalEditorImagen);
                 } catch {
@@ -324,7 +331,7 @@ var vmMisDatos = Vue.component('mis-datos', {
     // Datos Globales
     isTecnico: state => state.isTecnico,
     isProductora: state => state.isProductora,
-    mensajeInicialDropzone: state => {if (state.isTecnico) {return 'Tirá acá tu foto de perfil (únicamente .PNG o .JPEG)'} else if (state.isProductora) {return 'Tirá acá el logo de la productora (únicamente .PNG o .JPEG)'}},
+    mensajeInicialDropzone: state => { if (state.isTecnico) { return 'Tirá acá tu foto de perfil (únicamente .PNG o .JPEG)' } else if (state.isProductora) { return 'Tirá acá el logo de la productora (únicamente .PNG o .JPEG)' } },
     bancos: state => state.globales.bancos,
     tiposCuenta: state => state.globales.tiposCuenta,
   }),
@@ -352,74 +359,34 @@ var vmMisDatos = Vue.component('mis-datos', {
     `<div class="col-12 stretch-card">
     <div class="card">
       <div class="card-body">
-        <v-form
-          v-if="isTecnico"
-          id="sign-up-form"
-          class="pt-3"
-          v-model="formValidation"
-        >
+        <v-form v-if="isTecnico" id="sign-up-form" class="pt-3" v-model="formValidation">
           <h6 class="font-weight-bold mb-3">DATOS PERSONALES</h6>
           <v-divider></v-divider>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userNombre"
-                label="Nombre/s"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userNombre" label="Nombre/s" clearable></v-text-field>
             </div>
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userApellido"
-                label="Apellido/s"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userApellido" label="Apellido/s" clearable></v-text-field>
             </div>
           </div>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-bind:value="userEmail"
-                label="E-mail"
-                disabled
-              ></v-text-field>
+              <v-text-field v-bind:value="userEmail" label="E-mail" disabled></v-text-field>
             </div>
             <div class="form-group col-6 col-sm-6 col-md-3">
-              <v-text-field
-                v-model="userCodArea"
-                label="Código de área (sin 0)"
-                v-mask="'#####'"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userCodArea" label="Código de área (sin 0)" v-mask="'#####'" clearable></v-text-field>
             </div>
             <div class="form-group col-6 col-sm-6 col-md-3">
-              <v-text-field
-                v-model="userTelefono"
-                label="Celular (sin 15)"
-                v-mask="'########'"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userTelefono" label="Celular (sin 15)" v-mask="'########'" clearable></v-text-field>
             </div>
           </div>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userCuilCuit"
-                :rules="reglasCuil"
-                label="C.U.I.L."
-                v-mask="'##-########-#'"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userCuilCuit" :rules="reglasCuil" label="C.U.I.L." v-mask="'##-########-#'" clearable></v-text-field>
             </div>
             <div class="form-group col-12 col-md-6">
-              <v-menu
-                ref="menu"
-                v-model="menu"
-                :close-on-content-click="false"
-                transition="scale-transition"
-                offset-y
-                min-width="auto"
-              >
+              <v-menu ref="menu" v-model="menu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
                 <template v-slot:activator="{ on, attrs }">
                   <v-text-field
                     v-model="userFechaNacimiento"
@@ -445,87 +412,45 @@ var vmMisDatos = Vue.component('mis-datos', {
           </div>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userObraSocial"
-                label="Obra Social"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userObraSocial" label="Obra Social" clearable></v-text-field>
             </div>
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userNacionalidad"
-                label="Nacionalidad"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userNacionalidad" label="Nacionalidad" clearable></v-text-field>
             </div>
           </div>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userDireccion"
-                label="Dirección"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userDireccion" label="Dirección" clearable></v-text-field>
             </div>
             <div class="form-group col-6 col-sm-6 col-md-3">
-              <v-select
-                :items="listaAfiliacionSica"
-                v-model="userAfiliadoSica"
-                label="Afiliación SICA"
-              ></v-select>
+              <v-select :items="listaAfiliacionSica" v-model="userAfiliadoSica" label="Afiliación SICA"></v-select>
             </div>
             <div class="form-group col-6 col-sm-6 col-md-3">
-              <v-select
-                :items="listaAfiliacionSat"
-                v-model="userAfiliadoSat"
-                label="Afiliación SATSAID"
-              ></v-select>
+              <v-select :items="listaAfiliacionSat" v-model="userAfiliadoSat" label="Afiliación SATSAID"></v-select>
             </div>
           </div>
-          <h6 class="font-weight-bold my-3">DATOS COBRO HABERES</h6>
+          <h6 class="font-weight-bold my-3">DATOS PARA EL COBRO DE HABERES</h6>
           <v-divider></v-divider>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-select
-                no-data-text="No hay datos disponibles"
-                :items="listaBancos"
-                v-model="userBanco"
-                label="Banco"
-              ></v-select>
+              <v-select no-data-text="No hay datos disponibles" :items="listaBancos" v-model="userBanco" label="Banco"></v-select>
             </div>
             <div class="form-group col-12 col-md-6">
-              <v-select
-                no-data-text="No hay datos disponibles"
-                :items="listaTiposCuenta"
-                v-model="userTipoCuenta"
-                label="Tipo de cuenta"
-              ></v-select>
+              <v-select no-data-text="No hay datos disponibles" :items="listaTiposCuenta" v-model="userTipoCuenta" label="Tipo de cuenta"></v-select>
             </div>
           </div>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userNumeroCuenta"
-                label="Número de cuenta"
-                v-mask="'####################'"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userNumeroCuenta" label="Número de cuenta" v-mask="'####################'" clearable></v-text-field>
             </div>
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userCbu"
-                label="C.B.U."
-                :rules="reglasCbu"
-                counter="22"
-                v-mask="'######################'"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userCbu" label="C.B.U." :rules="reglasCbu" counter="22" v-mask="'######################'" clearable></v-text-field>
             </div>
           </div>
           <h6 class="font-weight-bold mb-3">FOTO DE PERFIL</h6>
           <v-divider></v-divider>
           <div class="row justify-content-center">
-            <div class="form-group col-9">
+            <div class="form-group col-9 mt-3">
               <div id="foto-logo-upload" class="dropzone"></div>
             </div>
           </div>
@@ -533,11 +458,7 @@ var vmMisDatos = Vue.component('mis-datos', {
             <div class="form-check">
               <label class="form-check-label text-muted">
                 <div class="d-flex justify-content-left">
-                  <input
-                    type="checkbox"
-                    class="form-control"
-                    v-model:value="userConsentimiento"
-                  />
+                  <input type="checkbox" class="form-control" v-model:value="userConsentimiento" />
                   Acepto compartir mis datos con las productoras que me contraten
                   <i class="input-helper"></i>
                 </div>
@@ -559,11 +480,7 @@ var vmMisDatos = Vue.component('mis-datos', {
                   ACTUALIZAR
                 </div>
                 <div v-if="actualizando && formValidation">
-                  <span
-                    class="spinner-border spinner-border-sm"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 </div>
                 <div v-if="!formValidation">
                   <i class="mdi mdi-close-octagon btn-icon-prepend"></i>
@@ -573,77 +490,40 @@ var vmMisDatos = Vue.component('mis-datos', {
             </div>
           </div>
         </v-form>
-        <v-form
-          v-if="isProductora"
-          id="sign-up-form"
-          class="pt-3"
-          v-model="formValidation"
-        >
-          <h6 class="font-weight-bold mb-3">DATOS PRODUCTORA</h6>
+        <v-form v-if="isProductora" id="sign-up-form" class="pt-3" v-model="formValidation">
+          <h6 class="font-weight-bold mb-3">DATOS DE LA PRODUCTORA</h6>
           <v-divider></v-divider>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userNombre"
-                label="Nombre"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userNombre" label="Nombre" clearable></v-text-field>
             </div>
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userRazonSocial"
-                label="Razón Social"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userRazonSocial" label="Razón Social" clearable></v-text-field>
             </div>
           </div>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-bind:value="userEmail"
-                label="E-mail"
-                disabled
-              ></v-text-field>
+              <v-text-field v-bind:value="userEmail" label="E-mail" disabled></v-text-field>
             </div>
             <div class="form-group col-6 col-sm-6 col-md-3">
-              <v-text-field
-                v-model="userCodArea"
-                label="Código de área (sin 0)"
-                v-mask="'#####'"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userCodArea" label="Código de área (sin 0)" v-mask="'#####'" clearable></v-text-field>
             </div>
             <div class="form-group col-6 col-sm-6 col-md-3">
-              <v-text-field
-                v-model="userTelefono"
-                label="Celular (sin 15)"
-                v-mask="'########'"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userTelefono" label="Celular (sin 15)" v-mask="'########'" clearable></v-text-field>
             </div>
           </div>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userCuilCuit"
-                :rules="reglasCuit"
-                label="C.U.I.T."
-                v-mask="'##-########-#'"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userCuilCuit" :rules="reglasCuit" label="C.U.I.T." v-mask="'##-########-#'" clearable></v-text-field>
             </div>
             <div class="form-group col-12 col-md-6">
-              <v-text-field
-                v-model="userDireccion"
-                label="Dirección"
-                clearable
-              ></v-text-field>
+              <v-text-field v-model="userDireccion" label="Dirección" clearable></v-text-field>
             </div>
           </div>
-          <h6 class="font-weight-bold mb-3">LOGO PRODUCTORA</h6>
+          <h6 class="font-weight-bold mb-3">LOGO DE LA PRODUCTORA</h6>
           <v-divider></v-divider>
           <div class="row justify-content-center">
-            <div class="form-group col-9">
+            <div class="form-group col-9 mt-3">
               <div id="foto-logo-upload" class="dropzone"></div>
             </div>
           </div>
@@ -651,11 +531,7 @@ var vmMisDatos = Vue.component('mis-datos', {
             <div class="form-check">
               <label class="form-check-label text-muted">
                 <div class="d-flex justify-content-left">
-                  <input
-                    type="checkbox"
-                    class="form-control"
-                    v-model:value="userConsentimiento"
-                  />
+                  <input type="checkbox" class="form-control" v-model:value="userConsentimiento" />
                   Acepto compartir mis datos
                   <i class="input-helper"></i>
                 </div>
@@ -677,11 +553,7 @@ var vmMisDatos = Vue.component('mis-datos', {
                   ACTUALIZAR
                 </div>
                 <div v-if="actualizando && formValidation">
-                  <span
-                    class="spinner-border spinner-border-sm"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 </div>
                 <div v-if="!formValidation">
                   <i class="mdi mdi-close-octagon btn-icon-prepend"></i>
@@ -694,8 +566,24 @@ var vmMisDatos = Vue.component('mis-datos', {
       </div>
     </div>
     <v-dialog v-model="dialog" persistent max-width="900px">
-      <v-card>
-        <div id="editor-imagen"></div>
+      <v-card id="card-editor-imagen">
+        <h6 class="font-weight-bold mb-3">RECORTÁ TU IMAGEN (1:1)</h6>
+        <v-divider></v-divider>
+        <div class="row m-0">
+          <div id="editor-imagen"></div>
+        </div>
+        <div id="botones-editor-imagen" class="row justify-content-center mx-0">
+          <div class="col pl-0 pb-4">
+            <button id="cancelar-edicion-imagen" type="button" class="btn btn-secondary btn-block btn-lg font-weight-medium auth-form-btn">
+              CANCELAR
+            </button>
+          </div>
+          <div class="col pr-0 pb-4">
+            <button id="confirmar-edicion-imagen" type="button" class="btn btn-primary btn-block btn-lg font-weight-medium auth-form-btn">
+              CONFIRMAR
+            </button>
+          </div>
+        </div>
       </v-card>
     </v-dialog>
   </div>`
