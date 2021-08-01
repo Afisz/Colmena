@@ -9,17 +9,12 @@ var vmMisDatos = Vue.component('mis-datos', {
       formValidation: true,
       dialog: false,
       myDropzone: null,
-      reglasCuil: [
-        v => v.length >= 13 || v.length == 0 || 'El C.U.I.L. debe tener 11 dígitos',
-      ],
-      reglasCuit: [
-        v => v.length >= 13 || v.length == 0 || 'El C.U.I.T. debe tener 11 dígitos',
-      ],
-      reglasCbu: [
-        v => v.length >= 22 || v.length == 0 || 'El C.B.U. debe tener 22 dígitos',
-      ],
-      listaBancos: [],
-      listaTiposCuenta: [],
+      // Reglas formularios
+      rules: {
+        reglasCuil: v => v == null || v.length >= 13 || v.length == 0 || 'El C.U.I.L. debe tener 11 dígitos',
+        reglasCuit: v => v == null || v.length >= 13 || v.length == 0 || 'El C.U.I.T. debe tener 11 dígitos',
+        reglasCbu: v => v == null || v.length >= 22 || v.length == 0 || 'El C.B.U. debe tener 22 dígitos',
+      },
       listaAfiliacionSica: [{ text: 'No afiliado al SICA', value: false }, { text: 'Afiliado al SICA', value: true }],
       listaAfiliacionSat: [{ text: 'No afiliado al SATSAID', value: false }, { text: 'Afiliado al SATSAID', value: true }],
       userNombre: '',
@@ -32,7 +27,9 @@ var vmMisDatos = Vue.component('mis-datos', {
       userFechaNacimiento: '',
       userObraSocial: '',
       userNacionalidad: '',
+      userEstudiosCursados: '',
       userDireccion: '',
+      userCodigoPostal: '',
       userSica: false,
       userSat: false,
       userBanco: '',
@@ -56,16 +53,16 @@ var vmMisDatos = Vue.component('mis-datos', {
         this.userFechaNacimiento = this.fechaNacimiento;
         this.userObraSocial = this.obraSocial;
         this.userNacionalidad = this.nacionalidad;
+        this.userEstudiosCursados = this.estudiosCursados;
         this.userDireccion = this.direccion;
-        this.userAfiliadoSica = this.sica;
-        this.userAfiliadoSat = this.sat;
+        this.userCodigoPostal = this.codigoPostal;
+        this.userSica = this.sica;
+        this.userSat = this.sat;
         this.userBanco = this.banco;
         this.userTipoCuenta = this.tipoCuenta;
         this.userNumeroCuenta = this.numeroCuenta;
         this.userCbu = this.cbu;
         this.userConsentimiento = this.consentimientoDatos;
-        this.listaBancos = this.bancos;
-        this.listaTiposCuenta = this.tiposCuenta;
       } else if (this.isProductora) {
         this.userNombre = this.nombreProductora;
         this.userRazonSocial = this.razonSocial;
@@ -96,19 +93,21 @@ var vmMisDatos = Vue.component('mis-datos', {
               tipoCuenta: this.userTipoCuenta,
             },
             direccion: this.userDireccion,
+            codigoPostal: this.userCodigoPostal,
             dni: this.userCuilCuit.slice(3, -2),
             fechaNacimiento: this.userFechaNacimiento,
             nacionalidad: this.userNacionalidad,
+            estudiosCursados: this.userEstudiosCursados,
             nombre: this.userNombre,
             obraSocial: this.userObraSocial,
-            sat: this.userAfiliadoSat,
-            sica: this.userAfiliadoSica,
+            sat: this.userSat,
+            sica: this.userSica,
           },
           nuevoUsuario: false,
           isTecnico: true,
           isProductora: false
         };
-        this.nombreImagen = 'foto-peril.png';
+        this.nombreImagen = 'foto-perfil.png';
       } else if (this.isProductora) {
         var datos = {
           consentimientoDatos: this.userConsentimiento,
@@ -135,12 +134,25 @@ var vmMisDatos = Vue.component('mis-datos', {
         if (user) {
           user.getIdToken()
             .then(function (token) {
-              fetch('https://us-central1-colmena-cac87.cloudfunctions.net/webApi/usuarios/' + user.uid, {
+              fetch(`https://us-central1-colmena-cac87.cloudfunctions.net/webApi/usuarios/${user.uid}`, {
                 method: 'put',
                 headers: { 'Authorization': 'Bearer ' + token },
                 body: formData
               })
-                .then(response => response.json())
+                .then(response => {
+                  if (response.ok) {
+                    _this.$toast.open({
+                      message: 'Datos actualizados.',
+                      type: 'success'
+                    })
+                  } else {
+                    _this.$toast.open({
+                      message: 'Error PUT Mis Datos',
+                      type: 'error'
+                    })
+                  }
+                  return response.json();
+                })
                 .then(data => {
                   if (data.img) {
                     datos['foto'] = data.img;
@@ -153,10 +165,6 @@ var vmMisDatos = Vue.component('mis-datos', {
                   _this.actualizando = false;
                   document.getElementById('actualizar-datos').disabled = false;
                   _this.myDropzone.removeAllFiles(true);
-                  _this.$toast.open({
-                    message: "Datos actualizados.",
-                    type: "success"
-                  })
                   console.log(data);
                 })
                 .catch(function (error) {
@@ -164,9 +172,9 @@ var vmMisDatos = Vue.component('mis-datos', {
                   document.getElementById('actualizar-datos').disabled = false;
                   _this.$toast.open({
                     message: error.message,
-                    type: "error"
+                    type: 'error'
                   })
-                  console.log('Hubo un problema con la actualización de los datos: ' + error.message);
+                  console.log(`Hubo un problema con la petición Fetch de Mis Datos: ${error.message}`);
                 })
             })
             .catch(function (error) {
@@ -174,15 +182,15 @@ var vmMisDatos = Vue.component('mis-datos', {
               document.getElementById('actualizar-datos').disabled = false;
               _this.$toast.open({
                 message: error.message,
-                type: "error"
+                type: 'error'
               })
-              console.log('Hubo un problema con la obtención del token: ' + error.message);
+              console.log(`Hubo un problema con la obtención del token: ${error.message}`);
             })
         }
       })
     },
     save(date) {
-      this.$refs.menu.save(date)
+      this.$refs.menu.save(date);
     },
     // Formatea la fecha del Date-Picker
     formatDate(date) {
@@ -309,7 +317,9 @@ var vmMisDatos = Vue.component('mis-datos', {
     fechaNacimiento: state => state.tecnico.datos.fechaNacimiento,
     obraSocial: state => state.tecnico.datos.obraSocial,
     nacionalidad: state => state.tecnico.datos.nacionalidad,
+    estudiosCursados: state => state.tecnico.datos.estudiosCursados,
     direccion: state => state.tecnico.datos.direccion,
+    codigoPostal: state => state.tecnico.datos.codigoPostal,
     sica: state => state.tecnico.datos.sica,
     sat: state => state.tecnico.datos.sat,
     banco: state => state.tecnico.datos.datosBancarios.banco,
@@ -332,8 +342,9 @@ var vmMisDatos = Vue.component('mis-datos', {
     isTecnico: state => state.isTecnico,
     isProductora: state => state.isProductora,
     mensajeInicialDropzone: state => { if (state.isTecnico) { return 'Tirá acá tu foto de perfil (únicamente .PNG o .JPEG)' } else if (state.isProductora) { return 'Tirá acá el logo de la productora (únicamente .PNG o .JPEG)' } },
-    bancos: state => state.globales.bancos,
-    tiposCuenta: state => state.globales.tiposCuenta,
+    listaBancos: state => state.globales.bancos,
+    listaTiposCuenta: state => state.globales.tiposCuenta,
+    listaEstudiosCursados: state => state.globales.estudiosCursados,
   }),
   created() {
     // Inicializa Dropzone en la creación del componente
@@ -344,12 +355,10 @@ var vmMisDatos = Vue.component('mis-datos', {
   watch: {
     // Call again the method if the route changes
     '$route': 'fetchData',
-
     // Arranca el Date-Picker en la vista de años
     menu(val) {
       val && setTimeout(() => (this.$refs.picker.activePicker = 'YEAR'))
     },
-
     // Formatea correctamente la fecha del Date-Picker antes de guardarla
     date(val) {
       this.userFechaNacimiento = this.formatDate(this.date);
@@ -374,16 +383,16 @@ var vmMisDatos = Vue.component('mis-datos', {
             <div class="form-group col-12 col-md-6">
               <v-text-field v-bind:value="userEmail" label="E-mail" disabled></v-text-field>
             </div>
-            <div class="form-group col-6 col-sm-6 col-md-3">
+            <div class="form-group col-12 col-sm-6 col-md-3">
               <v-text-field v-model="userCodArea" label="Código de área (sin 0)" v-mask="'#####'" clearable></v-text-field>
             </div>
-            <div class="form-group col-6 col-sm-6 col-md-3">
+            <div class="form-group col-12 col-sm-6 col-md-3">
               <v-text-field v-model="userTelefono" label="Celular (sin 15)" v-mask="'########'" clearable></v-text-field>
             </div>
           </div>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-text-field v-model="userCuilCuit" :rules="reglasCuil" label="C.U.I.L." v-mask="'##-########-#'" clearable></v-text-field>
+              <v-text-field v-model="userCuilCuit" :rules="[rules.reglasCuil]" label="C.U.I.L." v-mask="'##-########-#'" clearable></v-text-field>
             </div>
             <div class="form-group col-12 col-md-6">
               <v-menu ref="menu" v-model="menu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto">
@@ -395,6 +404,7 @@ var vmMisDatos = Vue.component('mis-datos', {
                     readonly
                     v-bind="attrs"
                     v-on="on"
+                    clearable
                   ></v-text-field>
                 </template>
                 <v-date-picker
@@ -414,19 +424,25 @@ var vmMisDatos = Vue.component('mis-datos', {
             <div class="form-group col-12 col-md-6">
               <v-text-field v-model="userObraSocial" label="Obra Social" clearable></v-text-field>
             </div>
-            <div class="form-group col-12 col-md-6">
+            <div class="form-group col-12 col-sm-6 col-md-3">
               <v-text-field v-model="userNacionalidad" label="Nacionalidad" clearable></v-text-field>
+            </div>
+            <div class="form-group col-12 col-sm-6 col-md-3">
+              <v-select :items="listaEstudiosCursados" v-model="userEstudiosCursados" label="Estudios Cursados"></v-select>
             </div>
           </div>
           <div class="row">
-            <div class="form-group col-12 col-md-6">
+            <div class="form-group col-12 col-sm-4 col-md-5">
               <v-text-field v-model="userDireccion" label="Dirección" clearable></v-text-field>
             </div>
-            <div class="form-group col-6 col-sm-6 col-md-3">
-              <v-select :items="listaAfiliacionSica" v-model="userAfiliadoSica" label="Afiliación SICA"></v-select>
+            <div class="form-group col-12 col-sm-2 col-md-1">
+              <v-text-field v-model="userCodigoPostal" label="C.P." clearable></v-text-field>
             </div>
-            <div class="form-group col-6 col-sm-6 col-md-3">
-              <v-select :items="listaAfiliacionSat" v-model="userAfiliadoSat" label="Afiliación SATSAID"></v-select>
+            <div class="form-group col-12 col-sm-6 col-md-3">
+              <v-select :items="listaAfiliacionSica" v-model="userSica" label="Afiliación SICA"></v-select>
+            </div>
+            <div class="form-group col-12 col-sm-6 col-md-3">
+              <v-select :items="listaAfiliacionSat" v-model="userSat" label="Afiliación SATSAID"></v-select>
             </div>
           </div>
           <h6 class="font-weight-bold my-3">DATOS PARA EL COBRO DE HABERES</h6>
@@ -444,7 +460,7 @@ var vmMisDatos = Vue.component('mis-datos', {
               <v-text-field v-model="userNumeroCuenta" label="Número de cuenta" v-mask="'####################'" clearable></v-text-field>
             </div>
             <div class="form-group col-12 col-md-6">
-              <v-text-field v-model="userCbu" label="C.B.U." :rules="reglasCbu" counter="22" v-mask="'######################'" clearable></v-text-field>
+              <v-text-field v-model="userCbu" label="C.B.U." :rules="[rules.reglasCbu]" counter="22" v-mask="'######################'" clearable></v-text-field>
             </div>
           </div>
           <h6 class="font-weight-bold mb-3">FOTO DE PERFIL</h6>
@@ -505,16 +521,16 @@ var vmMisDatos = Vue.component('mis-datos', {
             <div class="form-group col-12 col-md-6">
               <v-text-field v-bind:value="userEmail" label="E-mail" disabled></v-text-field>
             </div>
-            <div class="form-group col-6 col-sm-6 col-md-3">
+            <div class="form-group col-12 col-sm-6 col-md-3">
               <v-text-field v-model="userCodArea" label="Código de área (sin 0)" v-mask="'#####'" clearable></v-text-field>
             </div>
-            <div class="form-group col-6 col-sm-6 col-md-3">
+            <div class="form-group col-12 col-sm-6 col-md-3">
               <v-text-field v-model="userTelefono" label="Celular (sin 15)" v-mask="'########'" clearable></v-text-field>
             </div>
           </div>
           <div class="row">
             <div class="form-group col-12 col-md-6">
-              <v-text-field v-model="userCuilCuit" :rules="reglasCuit" label="C.U.I.T." v-mask="'##-########-#'" clearable></v-text-field>
+              <v-text-field v-model="userCuilCuit" :rules="[rules.reglasCuit]" label="C.U.I.T." v-mask="'##-########-#'" clearable></v-text-field>
             </div>
             <div class="form-group col-12 col-md-6">
               <v-text-field v-model="userDireccion" label="Dirección" clearable></v-text-field>

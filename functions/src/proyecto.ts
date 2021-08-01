@@ -6,6 +6,7 @@ import {randomBytes} from "crypto";
 import {v4 as uuidv4} from "uuid";
 import {db, bucket} from "./index";
 import {mailTransport} from "./mail";
+import {NotificacionNuevoProyecto} from "./notificaciones";
 
 ("use strict");
 
@@ -22,13 +23,14 @@ export interface Proyecto {
     sigla: string;
   };
   foto: string;
+  inicioRodaje: Date;
+  finRodaje: Date;
   logoProductora: string;
-  tecnicos: Array<any>;
   tecnicosInvitados: Array<any>;
   tipoProyecto: string;
 }
 
-// Proyecto Router
+// Proyectos Router
 export const proyectosRouter = express.Router();
 
 // Post Proyecto nuevo
@@ -50,19 +52,41 @@ proyectosRouter.post("", (req: any, res: any, next) => {
           }
 
           const data = JSON.parse(fields.data);
-          var publicPortadaPath: any = null;
-          var publicLogoPath: any = null;
           const promises: Array<any> = [];
           const idProyecto = autoId();
+          var publicPortadaPath: any = null;
+          var publicLogoPath: any = null;
+          var nuevoProyecto: Proyecto = {
+            datos: {
+              cuit: "",
+              direccion: "",
+              director: "",
+              email: "",
+              nombre: "",
+              productora: "",
+              razonSocial: "",
+              sigla: "",
+            },
+            foto: "",
+            inicioRodaje: null,
+            finRodaje: null,
+            logoProductora: "",
+            tecnicosInvitados: [],
+            tipoProyecto: "",
+          };
+          var portadaPath: any = null;
+          var logoPath: any = null;
+          var uuidPortada: any = null;
+          var uuidLogo: any = null;
 
-          if (files.portada && files.logo) {
-            const portadaPath = `proyectos/${idProyecto}/${files.portada.name}`;
-            const logoPath = `proyectos/${idProyecto}/${files.logo.name}`;
-            const uuidPortada = uuidv4();
-            const uuidLogo = uuidv4();
+          if ((files.portada && files.logo) || (files.portada && data.logoProductora != "")) {
+            portadaPath = `proyectos/${idProyecto}/portada-proyecto.png`;
+            logoPath = `proyectos/${idProyecto}/logo-productora-proyecto.png`;
+            uuidPortada = uuidv4();
+            uuidLogo = uuidv4();
             publicPortadaPath = createPersistentDownloadUrl(bucket.name, portadaPath, uuidPortada);
             publicLogoPath = createPersistentDownloadUrl(bucket.name, logoPath, uuidLogo);
-            const nuevoProyecto: Proyecto = {
+            nuevoProyecto = {
               datos: {
                 cuit: data.datos.cuit,
                 direccion: data.datos.direccion,
@@ -74,59 +98,140 @@ proyectosRouter.post("", (req: any, res: any, next) => {
                 sigla: data.datos.sigla,
               },
               foto: publicPortadaPath,
+              inicioRodaje: null,
+              finRodaje: null,
               logoProductora: publicLogoPath,
-              tecnicos: [],
               tecnicosInvitados: data.tecnicosInvitados,
               tipoProyecto: data.tipoProyecto,
             };
-            const muestraProyecto = {
-              director: nuevoProyecto.datos.director,
-              id: idProyecto,
-              nombre: nuevoProyecto.datos.nombre,
-              productora: nuevoProyecto.datos.productora,
-              tipoProyecto: nuevoProyecto.tipoProyecto,
-              foto: nuevoProyecto.foto,
+          } else if (files.portada) {
+            portadaPath = `proyectos/${idProyecto}/portada-proyecto.png`;
+            uuidPortada = uuidv4();
+            publicPortadaPath = createPersistentDownloadUrl(bucket.name, portadaPath, uuidPortada);
+            nuevoProyecto = {
+              datos: {
+                cuit: data.datos.cuit,
+                direccion: data.datos.direccion,
+                director: data.datos.director,
+                email: mailProductora,
+                nombre: data.datos.nombre,
+                productora: data.datos.productora,
+                razonSocial: data.datos.razonSocial,
+                sigla: data.datos.sigla,
+              },
+              foto: publicPortadaPath,
+              inicioRodaje: null,
+              finRodaje: null,
+              logoProductora: data.logoProductora,
+              tecnicosInvitados: data.tecnicosInvitados,
+              tipoProyecto: data.tipoProyecto,
             };
+          } else if (files.logo || data.logoProductora != "") {
+            logoPath = `proyectos/${idProyecto}/logo-productora-proyecto.png`;
+            uuidLogo = uuidv4();
+            publicLogoPath = createPersistentDownloadUrl(bucket.name, logoPath, uuidLogo);
+            nuevoProyecto = {
+              datos: {
+                cuit: data.datos.cuit,
+                direccion: data.datos.direccion,
+                director: data.datos.director,
+                email: mailProductora,
+                nombre: data.datos.nombre,
+                productora: data.datos.productora,
+                razonSocial: data.datos.razonSocial,
+                sigla: data.datos.sigla,
+              },
+              foto: "",
+              inicioRodaje: null,
+              finRodaje: null,
+              logoProductora: publicLogoPath,
+              tecnicosInvitados: data.tecnicosInvitados,
+              tipoProyecto: data.tipoProyecto,
+            };
+          } else {
+            nuevoProyecto = {
+              datos: {
+                cuit: data.datos.cuit,
+                direccion: data.datos.direccion,
+                director: data.datos.director,
+                email: mailProductora,
+                nombre: data.datos.nombre,
+                productora: data.datos.productora,
+                razonSocial: data.datos.razonSocial,
+                sigla: data.datos.sigla,
+              },
+              foto: "",
+              inicioRodaje: null,
+              finRodaje: null,
+              logoProductora: "",
+              tecnicosInvitados: data.tecnicosInvitados,
+              tipoProyecto: data.tipoProyecto,
+            };
+          }
 
-            data.tecnicosInvitados.forEach(async (tecnico) => {
-              const snapshotUsuario = await db.collection("usuarios").where("datos.email", "==", tecnico.email).get();
+          const muestraProyecto = {
+            director: nuevoProyecto.datos.director,
+            idProyecto: idProyecto,
+            nombre: nuevoProyecto.datos.nombre,
+            productora: nuevoProyecto.datos.productora,
+            tipoProyecto: nuevoProyecto.tipoProyecto,
+            foto: nuevoProyecto.foto,
+          };
 
-              if (!snapshotUsuario.empty) {
+          data.tecnicosInvitados.forEach(async (tecnico) => {
+            const snapshotUsuario = await db.collection("usuarios").where("datos.email", "==", tecnico.email).get();
+
+            const idInvitacion = autoId();
+
+            const invitacionAProyecto = Object.assign({idInvitacion: idInvitacion}, muestraProyecto);
+
+            const notificacion = new NotificacionNuevoProyecto(idInvitacion);
+
+            if (!snapshotUsuario.empty) {
+              promises.push(
+                db
+                  .doc(`usuarios/${snapshotUsuario.docs[0].id}`)
+                  .update({
+                    invitacionesProyectos: admin.firestore.FieldValue.arrayUnion(invitacionAProyecto),
+                    notificaciones: admin.firestore.FieldValue.arrayUnion(JSON.parse(JSON.stringify(notificacion))),
+                  })
+              );
+            } else {
+              const snapshotTecnicoInvitado = await db.collection("tecnicosInvitados").where("email", "==", tecnico.email).get();
+
+              if (!snapshotTecnicoInvitado.empty) {
                 promises.push(
-                  db.doc(`usuarios/${snapshotUsuario.docs[0].id}`)
-                  .update({invitacionesProyectos: admin.firestore.FieldValue.arrayUnion(muestraProyecto)})
+                  db
+                    .doc(`tecnicosInvitados/${snapshotTecnicoInvitado.docs[0].id}`)
+                    .update({
+                      proyectos: admin.firestore.FieldValue.arrayUnion(invitacionAProyecto),
+                      notificaciones: admin.firestore.FieldValue.arrayUnion(JSON.parse(JSON.stringify(notificacion))),
+                    })
                 );
               } else {
-                const snapshotTecnicoInvitado = await db.collection("tecnicosInvitados").where("email", "==", tecnico.email).get();
+                const tecnicoInvitado = {
+                  email: tecnico.email,
+                  proyectos: [invitacionAProyecto],
+                  notificaciones: [JSON.parse(JSON.stringify(notificacion))],
+                };
 
-                if (!snapshotTecnicoInvitado.empty) {
-                  promises.push(
-                    db
-                      .doc(`tecnicosInvitados/${snapshotTecnicoInvitado.docs[0].id}`)
-                      .update({proyectos: admin.firestore.FieldValue.arrayUnion(muestraProyecto)})
-                  );
-                } else {
-                  const tecnicoInvitado = {
-                    email: tecnico.email,
-                    proyectos: [muestraProyecto],
-                  };
-
-                  promises.push(db.collection("tecnicosInvitados").add(tecnicoInvitado));
-                }
+                promises.push(db.collection("tecnicosInvitados").add(tecnicoInvitado));
               }
+            }
 
-              const mailOptions = {
-                from: `${nuevoProyecto.datos.sigla} | ${nuevoProyecto.datos.productora} <${nuevoProyecto.datos.email}>`,
-                to: tecnico.email,
-                subject: `Invitación al proyecto: "${nuevoProyecto.datos.nombre}" de ${nuevoProyecto.datos.productora}`,
-                html: `<p style="font-size: 16px;">¡Hola! Fuiste invitado/a a participar en el nuevo proyecto de 
+            const mailOptions = {
+              from: `${nuevoProyecto.datos.sigla} | ${nuevoProyecto.datos.productora} <${nuevoProyecto.datos.email}>`,
+              to: tecnico.email,
+              subject: `Invitación al proyecto: "${nuevoProyecto.datos.nombre}" de ${nuevoProyecto.datos.productora}`,
+              html: `<p style="font-size: 16px;">¡Hola! Fuiste invitadx a participar en el nuevo proyecto de 
                 ${nuevoProyecto.datos.productora}: "${nuevoProyecto.datos.nombre}".<br>
                 Hacé click en este <a href="https://colmena-cac87.web.app/ingreso">link</a> para aceptar y empezar a utilizar Colmena.</p>`,
-              };
+            };
 
-              promises.push(mailTransport.sendMail(mailOptions));
-            });
+            promises.push(mailTransport.sendMail(mailOptions));
+          });
 
+          if (files.portada) {
             promises.push(
               bucket.upload(files.portada.path, {
                 destination: portadaPath,
@@ -137,7 +242,9 @@ proyectosRouter.post("", (req: any, res: any, next) => {
                 },
               })
             );
+          }
 
+          if (files.logo) {
             promises.push(
               bucket.upload(files.logo.path, {
                 destination: logoPath,
@@ -148,27 +255,43 @@ proyectosRouter.post("", (req: any, res: any, next) => {
                 },
               })
             );
+          }
 
-            promises.push(db.doc(`proyectos/${idProyecto}`).set(nuevoProyecto));
-
-            promises.push(db.doc(`usuarios/${req.user.uid}`).update({proyectos: admin.firestore.FieldValue.arrayUnion(muestraProyecto)}));
-
-            Promise.all(promises)
-              .then(() => {
-                fs.unlinkSync(files.portada.path);
-                fs.unlinkSync(files.logo.path);
-                return res.status(201).json({
-                  id: idProyecto,
-                  portada: publicPortadaPath,
-                  logo: publicLogoPath,
+          if (!files.logo && data.logoProductora != "") {
+            promises.push(
+              bucket.file(`usuarios/${req.user.uid}/logo-productora.png`).copy(logoPath, (errnullable, copiedFile, apiResponse) => {
+                copiedFile.setMetadata({
+                  metadata: {
+                    metadata: {
+                      firebaseStorageDownloadTokens: uuidLogo,
+                    },
+                  },
                 });
               })
-              .catch((error) => {
-                return res.status(500).json({Error: error});
-              });
-          } else {
-            return res.status(400).json({Error: error});
+            );
           }
+
+          promises.push(db.doc(`proyectos/${idProyecto}`).set(nuevoProyecto));
+
+          promises.push(db.doc(`usuarios/${req.user.uid}`).update({proyectos: admin.firestore.FieldValue.arrayUnion(muestraProyecto)}));
+
+          Promise.all(promises)
+            .then(() => {
+              if (files.portada) {
+                fs.unlinkSync(files.portada.path);
+              }
+              if (files.logo) {
+                fs.unlinkSync(files.logo.path);
+              }
+              return res.status(201).json({
+                id: idProyecto,
+                portada: nuevoProyecto.foto,
+                logo: nuevoProyecto.logoProductora,
+              });
+            })
+            .catch((error) => {
+              return res.status(500).json({Error: error});
+            });
         });
       }
     })

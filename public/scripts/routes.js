@@ -5,7 +5,6 @@ const routes = [
     path: '/',
     name: 'inicio',
     component: vmInicio,
-    // meta: {requiresAuth : true}
   },
   {
     path: '/mis-datos',
@@ -16,5 +15,15 @@ const routes = [
     path: '/ajustes',
     name: 'ajustes',
     component: vmAjustes
+  },
+  {
+    path: '/:idProyecto/dashboard',
+    name: 'dashboard',
+    component: vmDashboard
+  },
+  {
+    path: '/:idProyecto/invitacionesypermisos',
+    name: 'invitacionesypermisos',
+    component: vmInvitacionesYPermisos,
   }
 ]

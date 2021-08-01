@@ -7,7 +7,7 @@ import {db} from "./index";
 export const globalesRouter = express.Router();
 
 // Get Globales
-globalesRouter.get("/", (req: any, res: any) => {
+globalesRouter.get("", (req: any, res: any) => {
   db.doc("generales/globales")
     .get()
     .then((doc) => {

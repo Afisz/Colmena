@@ -4,7 +4,9 @@ import * as express from "express";
 import * as cors from "cors";
 import {usuariosRouter} from "./usuario";
 import {tareasRouter} from "./tarea";
+import {notificacionesRouter} from "./notificaciones";
 import {proyectosRouter} from "./proyecto";
+import {tecnicoProyectosRouter} from "./tecnicoProyecto";
 import {globalesRouter} from "./globales";
 
 "use strict";
@@ -68,7 +70,9 @@ app.use(cors({origin: ["https://colmena-cac87.web.app", "https://colmena-cac87.f
 app.use(validateFirebaseIdToken);
 app.use("/usuarios", usuariosRouter);
 app.use("/tareas", tareasRouter);
+app.use("/notificaciones", notificacionesRouter);
 app.use("/proyectos", proyectosRouter);
+app.use("/tecnicoProyectos", tecnicoProyectosRouter);
 app.use("/globales", globalesRouter);
 
 // Define Google Cloud Function name

@@ -9,11 +9,7 @@ var vmTareas = Vue.component('tareas', {
   },
   methods: {
     fetchData: function () {
-      if (this.isTecnico) {
-        this.userTareas = this.userTareasTecnicoStore;
-      } else if (this.isProductora) {
-        this.userTareas = this.userTareasProductoraStore;
-      }
+      this.userTareas = this.userTareasStore;
     },
     updateData: function () {
       let _this = this;
@@ -21,39 +17,44 @@ var vmTareas = Vue.component('tareas', {
         if (user) {
           user.getIdToken()
             .then(function (token) {
-              fetch('https://us-central1-colmena-cac87.cloudfunctions.net/webApi/tareas/' + user.uid, {
+              fetch(`https://us-central1-colmena-cac87.cloudfunctions.net/webApi/tareas/${user.uid}`, {
                 method: 'put',
                 headers: { 'Authorization': 'Bearer ' + token },
                 body: JSON.stringify(_this.userTareas)
               })
                 .then(response => {
-                  store.commit('PUT_TAREAS', _this.userTareas);
+                  if (response.ok) {
+                    store.commit('PUT_TAREAS', _this.userTareas);
+                  } else {
+                    _this.$toast.open({
+                      message: 'Error PUT de Tareas.',
+                      type: 'error'
+                    })
+                  }
                   return response.json();
                 })
-                .then(data => {
-                  console.log(data);
-                })
+                .then(data => { console.log(data) })
                 .catch(function (error) {
                   _this.$toast.open({
                     message: error.message,
-                    type: "error"
+                    type: 'error'
                   })
-                  console.log('Hubo un problema con la actualización de las tareas: ' + error.message);
+                  console.log(`Hubo un problema con la petición Fetch de las Tareas: ${error.message}`);
                 })
             })
             .catch(function (error) {
               _this.$toast.open({
                 message: error.message,
-                type: "error"
+                type: 'error'
               })
-              console.log('Hubo un problema con la obtención del token: ' + error.message);
+              console.log(`Hubo un problema con la obtención del token: ${error.message}`);
             })
         }
       })
     },
     agregarTarea: function () {
       if (this.tareaNueva.length > 62) {
-        this.userTareas.push({ tarea: this.tareaNueva + '..------', hecha: false });
+        this.userTareas.push({ tarea: `${this.tareaNueva}..------`, hecha: false });
       } else {
         this.userTareas.push({ tarea: this.tareaNueva, hecha: false });
       }
@@ -67,10 +68,7 @@ var vmTareas = Vue.component('tareas', {
   },
   store,
   computed: Vuex.mapState({
-    isTecnico: state => state.isTecnico,
-    isProductora: state => state.isProductora,
-    userTareasTecnicoStore: state => state.tecnico.tareas,
-    userTareasProductoraStore: state => state.productora.tareas
+    userTareasStore: state => { if (state.isTecnico) { return state.tecnico.tareas } else if (state.isProductora) { return state.productora.tareas } },
   }),
   created() {
     this.fetchData();
@@ -80,7 +78,7 @@ var vmTareas = Vue.component('tareas', {
     '$route': 'fetchData'
   },
   template:
-  `<div class="tab-pane fade show active scroll-wrapper" role="tabpanel">
+    `<div class="tab-pane fade show active scroll-wrapper" role="tabpanel">
     <div class="add-items d-flex px-3 mb-0">
       <div class="form w-100" v-on:keyup.enter="agregarTarea">
         <div class="form-group d-flex">

@@ -23,15 +23,15 @@ firebase.auth().onAuthStateChanged(function (user) {
 
             if (window.location.pathname == '/mis-datos') {
               // Método del componente "Mis Datos"
-              vmMain.$children[0].$children[6].fetchData();
+              vmMain.$route.matched[0].instances.default.fetchData();
             }
           })
           .catch(function (error) {
             Vue.$toast.open({
               message: error.message,
-              type: "error"
+              type: 'error'
             })
-            console.log('Hubo un problema con la petición Fetch: ' + error.message);
+            console.log('Hubo un problema con la petición Fetch del Usuario: ' + error.message);
           })
 
           fetch('https://us-central1-colmena-cac87.cloudfunctions.net/webApi/globales', {
@@ -44,21 +44,21 @@ firebase.auth().onAuthStateChanged(function (user) {
            
             if (window.location.pathname == '/mis-datos') {
               // Método del componente "Mis Datos"
-              vmMain.$children[0].$children[6].fetchData();
+              vmMain.$route.matched[0].instances.default.fetchData();
             }
           })
           .catch(function (error) {
             Vue.$toast.open({
               message: error.message,
-              type: "error"
+              type: 'error'
             })
-            console.log('Hubo un problema con la petición Fetch: ' + error.message);
+            console.log('Hubo un problema con la petición Fetch de los Globales: ' + error.message);
           })
       })
       .catch(function (error) {
         Vue.$toast.open({
           message: error.message,
-          type: "error"
+          type: 'error'
         })
         console.log('Hubo un problema con la obtención del token: ' + error.message);
       })

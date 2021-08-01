@@ -1,6 +1,6 @@
 'use strict'
 
-var vmAjustes = Vue.component('ajustes', {
+var vmDashboard = Vue.component('dashboard', {
     data: function () {
         return {
         }
@@ -11,9 +11,9 @@ var vmAjustes = Vue.component('ajustes', {
        `<div class="col-12 stretch-card">
        <div class="card">
          <div class="card-body">
-           <h6 class="font-weight-bold mb-3">AJUSTES</h6>
+           <h6 class="font-weight-bold mb-3">DASHBOARD</h6>
            <v-divider></v-divider>
-           <h3 class="mt-5 pt-5 text-muted text-center">Próximamente vas a poder configurar Colmena como quieras...</h3>
+           <h3 class="mt-5 pt-5 text-muted text-center">Próximamente...</h3>
          </div>
        </div>
      </div>`

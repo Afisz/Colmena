@@ -2,21 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <base href="/" />
     <title>Colmena</title>
     <link rel="stylesheet" href="vendors/mdi/css/materialdesignicons.min.css" />
-    <link
-      rel="stylesheet"
-      href="vendors/perfect-scrollbar/perfect-scrollbar.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css"
-    />
+    <link rel="stylesheet" href="vendors/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" />
     <link rel="stylesheet" href="styles/toasts.css" />
     <link rel="stylesheet" href="vendors/dropzone/dropzone.min.css" />
     <link
@@ -32,114 +23,72 @@
 
   <body class="sidebar-toggle-display">
     <!--Container scroller-->
-    <div
-      v-if="userUid"
-      id="vm"
-      class="container-scroller"
-      v-bind:class="{'sidebar-hidden': isSideBarHidden}"
-    >
+    <div v-if="userUid" id="vm" class="container-scroller" v-bind:class="{'sidebar-hidden': isSideBarHidden}">
       <v-app>
         <!-- Navbar -->
         <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
           <!--      Logo y botón del menu lateral izquierdo-->
           <div class="navbar-brand-wrapper d-flex justify-content-center">
-            <div
-              class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100"
-            >
+            <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
               <router-link class="navbar-brand brand-logo" to="/">
-                <img src="images/logo.png" alt="logo" />
+                <img src="images/logo.png" alt="logo" v-on:click="volverAlInicio"/>
               </router-link>
               <router-link class="navbar-brand brand-logo-white" to="/">
-                <img src="images/logo-white.svg" alt="logo" />
+                <img src="images/logo-white.svg" alt="logo" v-on:click="volverAlInicio"/>
               </router-link>
               <router-link class="navbar-brand brand-logo-mini" to="/">
-                <img src="images/logo-mini.svg" alt="logo" />
+                <img src="images/logo-mini.svg" alt="logo" v-on:click="volverAlInicio"/>
               </router-link>
 
               <!--          Botón del menu lateral version escritorio-->
-              <button
-                class="navbar-toggler navbar-toggler align-self-center"
-                type="button"
-                v-on:click="sidebarHidden"
-              >
+              <button class="navbar-toggler navbar-toggler align-self-center" type="button" v-on:click="sidebarHidden">
                 <span class="mdi mdi-sort-variant"></span>
               </button>
             </div>
           </div>
 
           <!--Menu central y superior derecho -->
-          <div
-            class="navbar-menu-wrapper d-flex align-items-center justify-content-end"
-          >
+          <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+            <h3>{{nombreProyectoActual}}</h3>
             <!--Menu superior derecho -->
             <ul class="navbar-nav navbar-nav-right">
               <!--          Mensajes-->
               <li class="nav-item dropdown mr-1">
                 <a
                   class="nav-link count-indicator dropdown-toggle d-flex justify-content-center align-items-center"
-                  id="messageDropdown"
                   href="#"
-                  data-toggle="dropdown"
+                  v-on:click="mensajesEstado"
                 >
                   <i class="mdi mdi-message-text mx-0"></i>
                   <span class="count"></span>
                 </a>
-                <div
-                  class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list"
-                  aria-labelledby="messageDropdown"
-                >
-                  <p class="mb-0 font-weight-normal float-left dropdown-header">
-                    Mensajes
-                  </p>
+                <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" v-bind:class="{'show': isMensajesOn}">
+                  <p class="mb-0 font-weight-normal float-left dropdown-header">Mensajes</p>
                   <a class="dropdown-item preview-item">
                     <div class="preview-thumbnail">
-                      <img
-                        src="images/faces/face4.jpg"
-                        alt="image"
-                        class="profile-pic"
-                      />
+                      <img src="images/faces/face4.jpg" alt="image" class="profile-pic" />
                     </div>
                     <div class="preview-item-content flex-grow">
-                      <h6 class="preview-subject ellipsis font-weight-normal">
-                        David Grey
-                      </h6>
-                      <p class="font-weight-light small-text text-muted mb-0">
-                        The meeting is cancelled
-                      </p>
+                      <h6 class="preview-subject ellipsis font-weight-normal">David Grey</h6>
+                      <p class="font-weight-light small-text text-muted mb-0">The meeting is cancelled</p>
                     </div>
                   </a>
                   <a class="dropdown-item preview-item">
                     <div class="preview-thumbnail">
-                      <img
-                        src="images/faces/face2.jpg"
-                        alt="image"
-                        class="profile-pic"
-                      />
+                      <img src="images/faces/face2.jpg" alt="image" class="profile-pic" />
                     </div>
                     <div class="preview-item-content flex-grow">
-                      <h6 class="preview-subject ellipsis font-weight-normal">
-                        Tim Cook
-                      </h6>
-                      <p class="font-weight-light small-text text-muted mb-0">
-                        New product launch
-                      </p>
+                      <h6 class="preview-subject ellipsis font-weight-normal">Tim Cook</h6>
+                      <p class="font-weight-light small-text text-muted mb-0">New product launch</p>
                     </div>
                   </a>
                   <a class="dropdown-item preview-item">
                     <div class="preview-thumbnail">
-                      <img
-                        src="images/faces/face3.jpg"
-                        alt="image"
-                        class="profile-pic"
-                      />
+                      <img src="images/faces/face3.jpg" alt="image" class="profile-pic" />
                     </div>
                     <div class="preview-item-content flex-grow">
-                      <h6 class="preview-subject ellipsis font-weight-normal">
-                        Johnson
-                      </h6>
-                      <p class="font-weight-light small-text text-muted mb-0">
-                        Upcoming board meeting
-                      </p>
+                      <h6 class="preview-subject ellipsis font-weight-normal">Johnson</h6>
+                      <p class="font-weight-light small-text text-muted mb-0">Upcoming board meeting</p>
                     </div>
                   </a>
                 </div>
@@ -149,97 +98,31 @@
               <li class="nav-item dropdown mr-4">
                 <a
                   class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center notification-dropdown"
-                  id="notificationDropdown"
-                  href="#"
-                  data-toggle="dropdown"
+                  v-on:click="notificacionesEstadoComponente"
                 >
-                  <i class="mdi mdi-bell mx-0"></i>
-                  <span class="count"></span>
+                  <v-badge :value="userNewNotificationsAmount > 0" :content="userNewNotificationsAmount" color="red" overlap>
+                    <i class="mdi mdi-bell mx-0"></i>
+                  </v-badge>
                 </a>
-                <div
-                  class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list"
-                  aria-labelledby="notificationDropdown"
-                >
-                  <p class="mb-0 font-weight-normal float-left dropdown-header">
-                    Notificaciones
-                  </p>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <div class="preview-icon bg-success">
-                        <i class="mdi mdi-information mx-0"></i>
-                      </div>
-                    </div>
-                    <div class="preview-item-content">
-                      <h6 class="preview-subject font-weight-normal">
-                        Application Error
-                      </h6>
-                      <p class="font-weight-light small-text mb-0 text-muted">
-                        Just now
-                      </p>
-                    </div>
-                  </a>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <div class="preview-icon bg-warning">
-                        <i class="mdi mdi-settings mx-0"></i>
-                      </div>
-                    </div>
-                    <div class="preview-item-content">
-                      <h6 class="preview-subject font-weight-normal">
-                        Settings
-                      </h6>
-                      <p class="font-weight-light small-text mb-0 text-muted">
-                        Private message
-                      </p>
-                    </div>
-                  </a>
-                  <a class="dropdown-item preview-item">
-                    <div class="preview-thumbnail">
-                      <div class="preview-icon bg-info">
-                        <i class="mdi mdi-account-box mx-0"></i>
-                      </div>
-                    </div>
-                    <div class="preview-item-content">
-                      <h6 class="preview-subject font-weight-normal">
-                        New user registration
-                      </h6>
-                      <p class="font-weight-light small-text mb-0 text-muted">
-                        2 days ago
-                      </p>
-                    </div>
-                  </a>
-                </div>
+                <notificaciones v-if="isNotificacionesOn"></notificaciones>
               </li>
 
               <!--          Profile-->
               <li class="nav-item nav-profile dropdown">
-                <a
-                  class="nav-link dropdown-toggle"
-                  href="#"
-                  data-toggle="dropdown"
-                  id="profileDropdown"
-                >
+                <a class="nav-link dropdown-toggle" v-on:click="menuUsuarioEstado">
                   <img v-bind:src="userPhoto" alt="" />
-                  <span class="nav-profile-name"
-                    >{{userName == ' ' || userName == '' ? userNameGoogle :
-                    userName}}</span
-                  >
+                  <span class="nav-profile-name">{{userName == ' ' || userName == '' ? userNameGoogle : userName}}</span>
                 </a>
                 <div
                   class="dropdown-menu dropdown-menu-right navbar-dropdown"
-                  aria-labelledby="profileDropdown"
+                  v-bind:class="{'show': isMenuUsuarioOn}"
+                  v-on:click="menuUsuarioEstado"
                 >
-                  <router-link
-                    class="dropdown-item dropdown-usuario"
-                    to="/mis-datos"
-                  >
+                  <router-link class="dropdown-item dropdown-usuario" to="/mis-datos">
                     <i class="mdi mdi-account text-primary"></i>
                     Mis Datos
                   </router-link>
-                  <router-link
-                    class="dropdown-item dropdown-usuario"
-                    to="/ajustes"
-                  >
+                  <router-link class="dropdown-item dropdown-usuario" to="/ajustes">
                     <i class="mdi mdi-settings text-primary"></i>
                     Ajustes
                   </router-link>
@@ -257,11 +140,7 @@
             </ul>
 
             <!--        Boton del menu lateral version responsive-->
-            <button
-              class="navbar-toggler navbar-toggler-right d-lg-none align-self-center"
-              type="button"
-              v-on:click="sidebarHiddenResponsive"
-            >
+            <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" v-on:click="sidebarHiddenResponsive">
               <span class="mdi mdi-menu"></span>
             </button>
           </div>
@@ -270,15 +149,8 @@
         <!--    Cuerpo central-->
         <div class="container-fluid page-body-wrapper">
           <!--      Menu aplicaciones derecho-->
-          <div
-            id="right-sidebar"
-            class="settings-panel"
-            v-bind:class="{'open': isTareasOn}"
-          >
-            <i
-              v-on:click="tareasEstadoComponente"
-              class="settings-close mdi mdi-close"
-            ></i>
+          <div id="right-sidebar" class="settings-panel" v-bind:class="{'open': isTareasOn}">
+            <i v-on:click="tareasEstadoComponente" class="settings-close mdi mdi-close"></i>
             <ul class="nav nav-tabs" id="setting-panel" role="tablist">
               <li class="nav-item">
                 <a
@@ -294,16 +166,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a
-                  class="nav-link"
-                  id="chats-tab"
-                  data-toggle="tab"
-                  href="#chats-section"
-                  role="tab"
-                  aria-controls="chats-section"
-                >
-                  CHATS
-                </a>
+                <a class="nav-link" id="chats-tab" data-toggle="tab" href="#chats-section" role="tab" aria-controls="chats-section"> CHATS </a>
               </li>
             </ul>
 
@@ -312,25 +175,10 @@
               <tareas v-if="isTareasOn"></tareas>
 
               <!--          Chat-->
-              <div
-                class="tab-pane fade"
-                id="chats-section"
-                role="tabpanel"
-                aria-labelledby="chats-section"
-              >
-                <div
-                  class="d-flex align-items-center justify-content-between border-bottom"
-                >
-                  <p
-                    class="settings-heading border-top-0 mb-3 pl-3 pt-0 border-bottom-0 pb-0"
-                  >
-                    Friends
-                  </p>
-                  <small
-                    class="settings-heading border-top-0 mb-3 pt-0 border-bottom-0 pb-0 pr-3 font-weight-normal"
-                  >
-                    See All
-                  </small>
+              <div class="tab-pane fade" id="chats-section" role="tabpanel" aria-labelledby="chats-section">
+                <div class="d-flex align-items-center justify-content-between border-bottom">
+                  <p class="settings-heading border-top-0 mb-3 pl-3 pt-0 border-bottom-0 pb-0">Friends</p>
+                  <small class="settings-heading border-top-0 mb-3 pt-0 border-bottom-0 pb-0 pr-3 font-weight-normal"> See All </small>
                 </div>
                 <ul class="chat-list">
                   <li class="list active">
@@ -355,9 +203,7 @@
                       </div>
                       <p>Away</p>
                     </div>
-                    <div class="badge badge-success badge-pill my-auto mx-2">
-                      4
-                    </div>
+                    <div class="badge badge-success badge-pill my-auto mx-2">4</div>
                     <small class="text-muted my-auto">23 min</small>
                   </li>
                   <li class="list">
@@ -410,204 +256,62 @@
           </div>
 
           <!--      Menu principal-->
-          <nav
-            id="sidebar"
-            class="sidebar sidebar-offcanvas"
-            v-bind:class="{'active': isSideBarVisibleResponsive}"
-          >
+          <nav id="sidebar" class="sidebar sidebar-offcanvas" v-bind:class="{'active': isSideBarVisibleResponsive}">
             <ul class="nav">
               <!-- Inicio -->
-              <li class="nav-item">
+              <li class="nav-item" v-on:click="volverAlInicio">
                 <router-link class="nav-link" to="/">
-                  <i class="mdi mdi-home menu-icon"></i>
-                  <span class="menu-title">Inicio</span>
+                  <i v-if="!isProyectoOn" class="mdi mdi-home menu-icon"></i>
+                  <i v-else-if="isProyectoOn" class="mdi mdi-redo-variant menu-icon"></i>
+                  <span class="menu-title">{{isProyectoOn ? 'Volver al Inicio' : 'Inicio'}}</span>
                 </router-link>
               </li>
 
-              <!-- Agenda / Calendario -->
-              <li class="nav-item">
-                <a class="nav-link" href="">
-                  <i class="mdi mdi-calendar-check menu-icon"></i>
-                  <span class="menu-title">Agenda</span>
-                </a>
-              </li>
-
-              <!-- Tecnicos -->
-              <li class="nav-item">
-                <a
-                  class="nav-link"
-                  data-toggle="collapse"
-                  href="#menu-tecnicos"
-                  aria-expanded="false"
-                  aria-controls="ui-basic"
-                >
-                  <i class="mdi mdi-account-group menu-icon"></i>
-                  <span class="menu-title">Técnicxs</span>
-                  <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="menu-tecnicos">
-                  <ul class="nav flex-column sub-menu">
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Accordions</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Buttons</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Badges</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Breadcrumbs</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Dropdowns</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Modals</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Progress bar</a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-
-              <!-- Horas extras -->
-              <li class="nav-item">
-                <a
-                  class="nav-link"
-                  data-toggle="collapse"
-                  href="#menu-horas-extras"
-                  aria-expanded="false"
-                  aria-controls="ui-advanced"
-                >
-                  <i class="mdi mdi-clock menu-icon"></i>
-                  <span class="menu-title">Horas Extras</span>
-                  <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="menu-horas-extras">
-                  <ul class="nav flex-column sub-menu">
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Dragula</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Clipboard</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Context menu</a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-
-              <!-- OTs -->
-              <li class="nav-item">
-                <a
-                  class="nav-link"
-                  data-toggle="collapse"
-                  href="#menu-ots"
-                  aria-expanded="false"
-                  aria-controls="form-elements"
-                >
-                  <i class="mdi mdi-view-headline menu-icon"></i>
-                  <span class="menu-title">OTs</span>
-                  <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="menu-ots">
-                  <ul class="nav flex-column sub-menu">
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Basic Elements</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Advanced Elements</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Validation</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Wizard</a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-
-              <!-- Caja -->
-              <li class="nav-item">
-                <a
-                  class="nav-link"
-                  data-toggle="collapse"
-                  href="#menu-caja"
-                  aria-expanded="false"
-                  aria-controls="editors"
-                >
-                  <i class="mdi mdi-cash-register menu-icon"></i>
-                  <span class="menu-title">Caja</span>
-                  <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="menu-caja">
-                  <ul class="nav flex-column sub-menu">
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Text editors</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Code editors</a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-
-              <!-- Rendiciones -->
-              <li class="nav-item">
-                <a
-                  class="nav-link"
-                  data-toggle="collapse"
-                  href="#menu-rendiciones"
-                  aria-expanded="false"
-                  aria-controls="editors"
-                >
-                  <i class="mdi mdi-cash-multiple menu-icon"></i>
-                  <span class="menu-title">Rendiciones</span>
-                  <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="menu-rendiciones">
-                  <ul class="nav flex-column sub-menu">
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Text editors</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Code editors</a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-
-              <!-- Reportes de produccion -->
-              <li class="nav-item">
-                <a
-                  class="nav-link"
-                  data-toggle="collapse"
-                  href="#menu-reportes-produccion"
-                  aria-expanded="false"
-                  aria-controls="charts"
-                >
-                  <i class="mdi mdi-chart-pie menu-icon"></i>
-                  <span class="menu-title">Reportes de Producción</span>
-                  <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="menu-reportes-produccion">
-                  <ul class="nav flex-column sub-menu">
-                    <li class="nav-item">
-                      <a class="nav-link" href="">ChartJs</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Morris</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="">Flot</a>
-                    </li>
-                  </ul>
-                </div>
-              </li>
+              <!-- Proyecto -->
+              <template v-if="isProyectoOn">
+                <!-- Inicio Proyecto -->
+                <li class="nav-item">
+                  <router-link class="nav-link" v-bind:to="`/${idProyectoSeleccionado}/dashboard`">
+                    <i class="mdi mdi-view-dashboard menu-icon"></i>
+                    <span class="menu-title">Dashboard</span>
+                  </router-link>
+                </li>
+                <!-- Tecnicos -->
+                <li v-if="permisosNav.includes('Técnicxs')" class="nav-item">
+                  <a class="nav-link" data-toggle="collapse" href="#menu-tecnicos" aria-expanded="false" aria-controls="ui-basic">
+                    <i class="mdi mdi-account-group menu-icon"></i>
+                    <span class="menu-title">Técnicxs</span>
+                    <i class="menu-arrow"></i>
+                  </a>
+                  <div class="collapse" id="menu-tecnicos">
+                    <ul class="nav flex-column sub-menu">
+                      <li class="nav-item">
+                        <router-link class="nav-link" v-bind:to="`/${idProyectoSeleccionado}/invitacionesypermisos`">Invitaciones y Permisos</router-link>
+                      </li>
+                    </ul>
+                    <ul class="nav flex-column sub-menu">
+                      <li class="nav-item">
+                        <a class="nav-link" href="">Altas</a>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+                <!-- Horas extras -->
+                <li class="nav-item">
+                  <a class="nav-link" data-toggle="collapse" href="#menu-horas-extras" aria-expanded="false" aria-controls="ui-advanced">
+                    <i class="mdi mdi-clock menu-icon"></i>
+                    <span class="menu-title">Horas Extras</span>
+                    <i class="menu-arrow"></i>
+                  </a>
+                  <div class="collapse" id="menu-horas-extras">
+                    <ul class="nav flex-column sub-menu">
+                      <li class="nav-item">
+                        <a class="nav-link" href="">Dragula</a>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </template>
             </ul>
           </nav>
 
@@ -620,19 +324,10 @@
 
             <!--        Footer-->
             <footer class="footer">
-              <div
-                class="d-sm-flex justify-content-center justify-content-sm-between"
-              >
-                <span
-                  class="text-muted text-center text-sm-left d-block d-sm-inline-block"
-                >
-                  Colmena® 2021 - Todos los derechos reservados.
-                </span>
-                <span
-                  class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"
-                >
-                  Hecho a mano con <i class="mdi mdi-heart text-danger"></i
-                  ><i class="mdi mdi-video-vintage text-dark"></i>
+              <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                <span class="text-muted text-center text-sm-left d-block d-sm-inline-block"> Colmena® 2021 - Todos los derechos reservados. </span>
+                <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">
+                  Hecho a mano con <i class="mdi mdi-heart text-danger"></i><i class="mdi mdi-video-vintage text-dark"></i>
                 </span>
               </div>
             </footer>
@@ -642,19 +337,19 @@
     </div>
 
     <!--Firebase:-->
-    <script src="/__/firebase/8.2.7/firebase-app.js"></script>
-    <script src="/__/firebase/8.2.7/firebase-auth.js"></script>
-    <script src="/__/firebase/8.2.7/firebase-firestore.js"></script>
+    <script src="/__/firebase/8.7.0/firebase-app.js"></script>
+    <script src="/__/firebase/8.7.0/firebase-auth.js"></script>
+    <!-- <script src="/__/firebase/8.2.7/firebase-firestore.js"></script>
     <script src="/__/firebase/8.2.7/firebase-functions.js"></script>
     <script src="/__/firebase/8.2.7/firebase-messaging.js"></script>
-    <script src="/__/firebase/8.2.7/firebase-storage.js"></script>
+    <script src="/__/firebase/8.2.7/firebase-storage.js"></script> -->
     <script src="/__/firebase/init.js?useEmulator=true"></script>
 
     <!--Dependencias JS:-->
     <!--Vue, VueX, Vue Router y Vuetify-->
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-    <script src="https://unpkg.com/vuex@2.0.0"></script>
-    <script src="https://unpkg.com/vue-router@2.0.0/dist/vue-router.js"></script>
+    <script src="https://unpkg.com/vuex@3.6.2"></script>
+    <script src="https://unpkg.com/vue-router@3.5.2/dist/vue-router.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 
     <!--JQuery-->
@@ -706,9 +401,13 @@
     <script defer src="scripts/vistas/inicio.js"></script>
     <script defer src="scripts/vistas/mis-datos.js"></script>
     <script defer src="scripts/vistas/ajustes.js"></script>
+    <script defer src="scripts/vistas/dashboard.js"></script>
+    <script defer src="scripts/vistas/invitacionesypermisos.js"></script>
 
     <!--  Componentes-->
+    <script defer src="scripts/componentes/notificaciones.js"></script>
     <script defer src="scripts/componentes/tareas.js"></script>
+    <script defer src="scripts/componentes/dialog-dos-botones-multifuncion.js"></script>
 
     <!--  Rutas de Vue.js Router-->
     <script defer src="scripts/routes.js"></script>

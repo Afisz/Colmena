@@ -14,6 +14,7 @@ export interface Tecnico {
   datos: {
     apellido: string;
     codigoArea: string;
+    codigoPostal: string;
     cuil: string;
     datosBancarios: {
       banco: string;
@@ -24,6 +25,7 @@ export interface Tecnico {
     direccion: string;
     dni: string;
     email?: string;
+    estudiosCursados: string;
     fechaNacimiento: string;
     nacionalidad: string;
     nombre?: string;
@@ -36,6 +38,7 @@ export interface Tecnico {
   invitacionesProyectos: Array<any>;
   isProductora: boolean;
   isTecnico: boolean;
+  notificaciones: Array<any>;
   nuevoUsuario: boolean;
   proyectos: Array<any>;
   tareas: Array<Tarea>;
@@ -56,6 +59,7 @@ export interface Productora {
   foto: string;
   isProductora: boolean;
   isTecnico: boolean;
+  notificaciones: Array<any>;
   nuevoUsuario: boolean;
   proyectos: Array<any>;
   tareas: Array<Tarea>;
@@ -73,6 +77,7 @@ export const creacionTecnico = functions.auth.user().onCreate(async (user) => {
       datos: {
         apellido: "",
         codigoArea: "",
+        codigoPostal: "",
         cuil: "",
         datosBancarios: {
           banco: "",
@@ -83,6 +88,7 @@ export const creacionTecnico = functions.auth.user().onCreate(async (user) => {
         direccion: "",
         dni: "",
         email: user.email,
+        estudiosCursados: "",
         fechaNacimiento: "",
         nacionalidad: "",
         nombre: "",
@@ -95,6 +101,7 @@ export const creacionTecnico = functions.auth.user().onCreate(async (user) => {
       invitacionesProyectos: [],
       isProductora: false,
       isTecnico: true,
+      notificaciones: [],
       nuevoUsuario: true,
       proyectos: [],
       tareas: [],
@@ -106,6 +113,7 @@ export const creacionTecnico = functions.auth.user().onCreate(async (user) => {
       datos: {
         apellido: "",
         codigoArea: "",
+        codigoPostal: "",
         cuil: "",
         datosBancarios: {
           banco: "",
@@ -116,6 +124,7 @@ export const creacionTecnico = functions.auth.user().onCreate(async (user) => {
         direccion: "",
         dni: "",
         email: user.email,
+        estudiosCursados: "",
         fechaNacimiento: "",
         nacionalidad: "",
         nombre: "",
@@ -129,6 +138,7 @@ export const creacionTecnico = functions.auth.user().onCreate(async (user) => {
       isProductora: false,
       isTecnico: true,
       nuevoUsuario: true,
+      notificaciones: snapshot.docs[0].data().notificaciones,
       proyectos: [],
       tareas: [],
     };
@@ -191,6 +201,7 @@ usuariosRouter.put("/:id", (req: any, res: any, next) => {
             "datos.apellido": data.datos.apellido,
             "datos.telefono": data.datos.telefono,
             "datos.codigoArea": data.datos.codigoArea,
+            "datos.codigoPostal": data.datos.codigoPostal,
             "datos.cuil": data.datos.cuil,
             "datos.datosBancarios.banco": data.datos.datosBancarios.banco,
             "datos.datosBancarios.cbu": data.datos.datosBancarios.cbu,
@@ -198,6 +209,7 @@ usuariosRouter.put("/:id", (req: any, res: any, next) => {
             "datos.datosBancarios.tipoCuenta": data.datos.datosBancarios.tipoCuenta,
             "datos.direccion": data.datos.direccion,
             "datos.dni": data.datos.dni,
+            "datos.estudiosCursados": data.datos.estudiosCursados,
             "datos.fechaNacimiento": data.datos.fechaNacimiento,
             "datos.nacionalidad": data.datos.nacionalidad,
             "datos.nombre": data.datos.nombre,
@@ -247,6 +259,7 @@ usuariosRouter.put("/:id", (req: any, res: any, next) => {
             "datos.apellido": data.datos.apellido,
             "datos.telefono": data.datos.telefono,
             "datos.codigoArea": data.datos.codigoArea,
+            "datos.codigoPostal": data.datos.codigoPostal,
             "datos.cuil": data.datos.cuil,
             "datos.datosBancarios.banco": data.datos.datosBancarios.banco,
             "datos.datosBancarios.cbu": data.datos.datosBancarios.cbu,
@@ -254,6 +267,7 @@ usuariosRouter.put("/:id", (req: any, res: any, next) => {
             "datos.datosBancarios.tipoCuenta": data.datos.datosBancarios.tipoCuenta,
             "datos.direccion": data.datos.direccion,
             "datos.dni": data.datos.dni,
+            "datos.estudiosCursados": data.datos.estudiosCursados,
             "datos.fechaNacimiento": data.datos.fechaNacimiento,
             "datos.nacionalidad": data.datos.nacionalidad,
             "datos.nombre": data.datos.nombre,

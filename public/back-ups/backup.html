@@ -1,3 +1,8 @@
+filtroPuestos: function (index) {
+  this.listaPuestos = Object.keys(this.areasPuestosSueldos[this.tecnicosNuevos[index].area]);
+},
+
+
 'use strict'
 
 var vmInicio = Vue.component('inicio', {
@@ -11,6 +16,7 @@ var vmInicio = Vue.component('inicio', {
       dialogEditor: false,
       creandoAceptando: false,
       declinandoProyecto: false,
+      guardandoDatos: false,
       pasoProyecto: 1,
       menu: false,
       date: '',
@@ -224,118 +230,10 @@ var vmInicio = Vue.component('inicio', {
       })
     },
     // Post aceptar proyecto
-    aceptarProyectoYGuardarDatos: function (guardaDatos) {
+    aceptarProyecto: function () {
+      document.getElementById('boton-aceptar-proyecto').disabled = true;
+      this.creandoAceptando = true;
       let _this = this;
-      this.dialogGuardarDatos = false;
-
-      if (guardaDatos) {
-        if (this.tipoProyectoAceptado == 'Cine') {
-          var datosAGuardar = {
-            consentimientoDatos: this.consentimientoDatos,
-            datos: {
-              apellido: this.tecnicoApellido,
-              codigoArea: this.tecnicoCodArea,
-              codigoPostal: this.tecnicoCodigoPostal,
-              cuil: this.tecnicoCuil,
-              datosBancarios: {
-                banco: this.tecnicoBanco,
-                cbu: this.tecnicoCbu,
-                numeroCuenta: this.tecnicoNumeroCuenta,
-                tipoCuenta: this.tecnicoTipoCuenta,
-              },
-              direccion: this.tecnicoDireccion,
-              dni: this.tecnicoCuil.slice(3, -2),
-              estudiosCursados: this.tecnicoEstudiosCursados,
-              fechaNacimiento: this.tecnicoFechaNacimiento,
-              nacionalidad: this.tecnicoNacionalidad,
-              nombre: this.tecnicoNombre,
-              obraSocial: this.tecnicoObraSocial,
-              sat: this.sat,
-              sica: this.tecnicoSica,
-              telefono: this.tecnicoTelefono,
-            },
-            nuevoUsuario: false,
-            isTecnico: true,
-            isProductora: false
-          };
-        } else if (this.tipoProyectoAceptado == 'TV') {
-          var datosAGuardar = {
-            consentimientoDatos: this.consentimientoDatos,
-            datos: {
-              apellido: this.tecnicoApellido,
-              codigoArea: this.tecnicoCodArea,
-              codigoPostal: this.tecnicoCodigoPostal,
-              cuil: this.tecnicoCuil,
-              datosBancarios: {
-                banco: this.tecnicoBanco,
-                cbu: this.tecnicoCbu,
-                numeroCuenta: this.tecnicoNumeroCuenta,
-                tipoCuenta: this.tecnicoTipoCuenta,
-              },
-              direccion: this.tecnicoDireccion,
-              dni: this.tecnicoCuil.slice(3, -2),
-              estudiosCursados: this.tecnicoEstudiosCursados,
-              fechaNacimiento: this.tecnicoFechaNacimiento,
-              nacionalidad: this.tecnicoNacionalidad,
-              nombre: this.tecnicoNombre,
-              obraSocial: this.tecnicoObraSocial,
-              sat: this.tecnicoSat,
-              sica: this.sica,
-              telefono: this.tecnicoTelefono,
-            },
-            nuevoUsuario: false,
-            isTecnico: true,
-            isProductora: false
-          };
-        }
-        var formData = new FormData();
-        formData.append("data", JSON.stringify(datosAGuardar));
-        firebase.auth().onAuthStateChanged(function (user) {
-          if (user) {
-            user.getIdToken()
-              .then(function (token) {
-                fetch(`https://us-central1-colmena-cac87.cloudfunctions.net/webApi/usuarios/${user.uid}`, {
-                  method: 'put',
-                  headers: { 'Authorization': 'Bearer ' + token },
-                  body: formData
-                })
-                  .then(response => {
-                    if (response.ok) {
-                      _this.$toast.open({
-                        message: 'Datos actualizados.',
-                        type: 'success'
-                      })
-                    } else {
-                      _this.$toast.open({
-                        message: 'Error PUT Mis Datos',
-                        type: 'error'
-                      })
-                    }
-                    return response.json();
-                  })
-                  .then(data => {
-                    store.commit('PUT_INFO_TECNICO', datosAGuardar);
-                    console.log(data);
-                  })
-                  .catch(function (error) {
-                    _this.$toast.open({
-                      message: error.message,
-                      type: 'error'
-                    })
-                    console.log(`Hubo un problema con la petición Fetch de Mis Datos: ${error.message}`);
-                  })
-              })
-              .catch(function (error) {
-                _this.$toast.open({
-                  message: error.message,
-                  type: 'error'
-                })
-                console.log(`Hubo un problema con la obtención del token: ${error.message}`);
-              })
-          }
-        })
-      }
-
       if (this.tipoProyectoAceptado == 'Cine') {
         var datos = {
           datos: {
@@ -509,11 +407,9 @@ var vmInicio = Vue.component('inicio', {
         }
       })
     },
-    // Abre el dialog para saber si guarda o no datos a la hora de aceptar el proyecto
-    preAceptarProyecto: function () {
-      document.getElementById('boton-aceptar-proyecto').disabled = true;
-      this.creandoAceptando = true;
-      this.dialogGuardarDatos = true;
+    // Guarda los datos para el proyecto en Mis Datos
+    guardarDatos: function () {
+
     },
     // Abre / Get el proyecto seleccionado
     abrirProyecto: function (proyecto) {
@@ -537,8 +433,7 @@ var vmInicio = Vue.component('inicio', {
                   .then(data => {
                     store.commit('GET_INFO_TECNICOPROYECTO', data);
                     vmMain.isProyectoOn = true;
-                    vmMain.nombreProyectoActual = proyecto.nombre;
-                    _this.$router.push({path: `/${vmMain.idProyectoSeleccionado}/dashboard`});
+                    vmMain.nombreProyectoSeleccionado = proyecto.nombre.replace(' ', '_');
                   })
                   .catch(function (error) {
                     console.log(`Hubo un problema con la petición Fetch del TecnicoProyecto: ${error.message}`);
@@ -550,6 +445,8 @@ var vmInicio = Vue.component('inicio', {
           }
         })
       }
+
+
     },
     eliminaTecnicoDeLaLista: function (index) {
       if (this.tecnicosNuevos.length > 1) {
@@ -860,7 +757,6 @@ var vmInicio = Vue.component('inicio', {
     tipoCuenta: state => state.tecnico.datos.datosBancarios.tipoCuenta,
     numeroCuenta: state => state.tecnico.datos.datosBancarios.numeroCuenta,
     cbu: state => state.tecnico.datos.datosBancarios.cbu,
-    consentimientoDatos: state => state.tecnico.consentimientoDatos,
 
     // Datos Productora
     proyectosProductora: state => state.productora.proyectos,
@@ -984,7 +880,7 @@ var vmInicio = Vue.component('inicio', {
                 <div class="row">
                   <div v-for="(proyecto, index) in proyectosTecnico" class="col-md-4">
                     <v-hover v-slot="{hover}">
-                      <v-card class="proyectos-card bg-light" :class="{'on-hover': hover}" v-on:click="abrirProyecto(proyecto)">
+                      <v-card class="proyectos-card bg-light" :class="{'on-hover': hover}">
                         <template v-if="proyecto.foto != ''">
                           <v-img class="white--text align-end" height="100%" v-bind:src="proyecto.foto">
                             <v-responsive :aspect-ratio="4/4">
@@ -1161,8 +1057,8 @@ var vmInicio = Vue.component('inicio', {
                       <v-card id="form-tecnicos-proyecto-nuevo" class="mb-12">
                         <v-card-text class="px-0">
                           Invite a sus primerxs técnicxs al proyecto. Indique el área y los permisos que les dará a cada unx de ellxs (podrá
-                          modificarlos luego). Recomendamos agregar por lo menos una persona con el permiso "Técnicxs" para que le ayude a seguir
-                          invitando a otrxs técnicxs y a manejar sus permisos.
+                          modificarlos luego). Recomendamos agregar por lo menos una persona con el permiso "Técnicxs" para que le ayude a seguir invitando 
+                          a otrxs técnicxs y a manejar sus permisos.
                         </v-card-text>
                         <v-form lazy-validation class="pt-3" v-model="formTecnicosValidation" ref="formTecnicos">
                           <div v-for="(tecnico, index) in tecnicosNuevos">
@@ -1178,7 +1074,12 @@ var vmInicio = Vue.component('inicio', {
                                     ></v-text-field>
                                   </div>
                                   <div class="form-group col-12 col-md-6">
-                                    <v-select :items="listaAreas" v-model="tecnico.area" :rules="[rules.obligatorio]" label="Área"></v-select>
+                                    <v-select
+                                      :items="listaAreas"
+                                      v-model="tecnico.area"
+                                      :rules="[rules.obligatorio]"
+                                      label="Área"
+                                    ></v-select>
                                   </div>
                                 </div>
                                 <div class="row">
@@ -1385,9 +1286,8 @@ var vmInicio = Vue.component('inicio', {
           <v-stepper-content step="1">
             <v-card id="form-datos-proyecto-nuevo" class="mb-12">
               <v-card-text class="px-0">
-                Fuiste invitadx a participar en {{tipoProyectoAceptado == 'Cine' ? 'la nueva película' : tipoProyectoAceptado == 'TV' ? 'la nueva serie' : 'el nuevo proyecto'}}
-                 de {{productoraProyectoAceptado}}: "{{nombreProyectoAceptado}}". Completá y/o corregí tus datos y aceptá el proyecto para compartirlos con la productora (o presioná
-                <a style="color: #4d83ff" v-on:click="dialogDeclinacionInvitacion = true">acá</a> para declinar la invitación):
+                Fuiste invitadx a participar en {{tipoProyectoAceptado == 'Cine' ? 'la nueva película' : tipoProyectoAceptado == 'TV' ? 'la nueva serie' : 'el nuevo proyecto'}} de {{productoraProyectoAceptado}}: "{{nombreProyectoAceptado}}".
+                Completá y/o corregí tus datos y aceptá el proyecto para compartirlos con la productora (o presioná <a style="color: #4d83ff" v-on:click="dialogDeclinacionInvitacion = true">acá</a> para declinar la invitación):
               </v-card-text>
               <v-form lazy-validation class="pt-3" v-model="formDatosContacto" ref="formDatosContacto">
                 <div class="row w-100">
@@ -1502,12 +1402,7 @@ var vmInicio = Vue.component('inicio', {
                     <v-select :items="listaAfiliacionSat" v-model="tecnicoSat" label="Afiliación SATSAID"></v-select>
                   </div>
                   <div class="form-group col-12 col-sm-6 col-md-3">
-                    <v-select
-                      :items="listaEstudiosCursados"
-                      v-model="tecnicoEstudiosCursados"
-                      :rules="[rules.obligatorio]"
-                      label="Estudios Cursados"
-                    ></v-select>
+                    <v-select :items="listaEstudiosCursados" v-model="tecnicoEstudiosCursados" :rules="[rules.obligatorio]" label="Estudios Cursados"></v-select>
                   </div>
                 </div>
                 <div class="row w-100">
@@ -1572,7 +1467,7 @@ var vmInicio = Vue.component('inicio', {
                   style="height: 48px; padding: 0px"
                   v-bind:class="{'btn-primary': completeFormValidationAceptarProyecto, 'btn-danger': !completeFormValidationAceptarProyecto}"
                   v-bind:disabled="!completeFormValidationAceptarProyecto"
-                  v-on:click="preAceptarProyecto"
+                  v-on:click="aceptarProyecto"
                 >
                   <div v-if="!creandoAceptando && completeFormValidationAceptarProyecto">ACEPTAR PROYECTO</div>
                   <div v-if="creandoAceptando && completeFormValidationAceptarProyecto">
@@ -1594,20 +1489,9 @@ var vmInicio = Vue.component('inicio', {
       v-bind:enProceso="declinandoProyecto"
       titulo="RECHAZAR INVITACIÓN"
       texto="¿Estás seguro/a de querer rechazar esta invitación?"
-      textoBotonCancelar="CANCELAR"
       textoBotonPrincipal="RECHAZAR"
       v-bind:funcionBotonPrincipal="declinarInvitacionAProyecto"
       v-on:cancelar="dialogDeclinacionInvitacion = false"
     ></dialog-dos-botones-multifuncion>
-    <dialog-dos-botones-multifuncion
-      v-bind:activador="dialogGuardarDatos"
-      v-bind:enProceso="false"
-      titulo="ACTUALIZAR MIS DATOS"
-      texto="¿Querés guardar estos datos para futuros proyectos?"
-      textoBotonCancelar="NO"
-      textoBotonPrincipal="SI"
-      v-bind:funcionBotonPrincipal="aceptarProyectoYGuardarDatos.bind(true)"
-      v-on:cancelar="aceptarProyectoYGuardarDatos(false)"
-    ></dialog-dos-botones-multifuncion>
-    </div>`
+  </div>`
 })
