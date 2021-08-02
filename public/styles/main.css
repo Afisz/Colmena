@@ -8,9 +8,45 @@
 }
 
 h6 {
-  color: #4d83ff;
+  color: #1976d2;
 }
 
+.custom-loader {
+  animation: loader 1s infinite;
+  display: flex;
+}
+@-moz-keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@-o-keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes loader {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* Vuetify */
 .v-stepper__step:hover {
@@ -31,13 +67,13 @@ h6 {
 
 /* Dropzone JS */
 .dropzone {
-  border: 2px dashed #4d83ff;
+  border: 2px dashed #1976d2;
   border-radius: 5px;
   background: white;
 }
 
 .dropzone.dz-drag-hover {
-  border: 2px solid #4d83ff;
+  border: 2px solid #1976d2;
 }
 
 .dropzone .dz-preview .dz-success-mark,
@@ -54,7 +90,7 @@ h6 {
 }
 
 .v-application .dz-preview a {
-  color: #4d83ff !important;
+  color: #1976d2 !important;
 }
 
 .dropzone .dz-preview .dz-image {
@@ -104,7 +140,7 @@ h6 {
 }
 
 #boton-nuevo-proyecto {
-  color: #4d83ff !important;
+  color: #1976d2 !important;
   font-size: 6rem;
   line-height: 6rem !important;
 }
@@ -145,7 +181,7 @@ h6 {
 
 .boton-eliminar-invitacion-tecnico:hover {
   font-size: 2rem;
-  color: #4d83ff;
+  color: #1976d2;
   cursor: pointer;
 }
 
@@ -155,7 +191,7 @@ h6 {
 
 #boton-agregar-invitacion-tecnico:hover {
   font-size: 1.25rem;
-  color: #4d83ff;
+  color: #1976d2;
   cursor: pointer;
 }
 

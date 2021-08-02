@@ -75,7 +75,6 @@ var vmMisDatos = Vue.component('mis-datos', {
       }
     },
     updateData() {
-      document.getElementById('actualizar-datos').disabled = true;
       this.actualizando = true;
       let _this = this;
       if (this.isTecnico) {
@@ -163,13 +162,11 @@ var vmMisDatos = Vue.component('mis-datos', {
                     store.commit('PUT_INFO_PRODUCTORA', datos);
                   }
                   _this.actualizando = false;
-                  document.getElementById('actualizar-datos').disabled = false;
                   _this.myDropzone.removeAllFiles(true);
                   console.log(data);
                 })
                 .catch(function (error) {
                   _this.actualizando = false;
-                  document.getElementById('actualizar-datos').disabled = false;
                   _this.$toast.open({
                     message: error.message,
                     type: 'error'
@@ -179,7 +176,6 @@ var vmMisDatos = Vue.component('mis-datos', {
             })
             .catch(function (error) {
               _this.actualizando = false;
-              document.getElementById('actualizar-datos').disabled = false;
               _this.$toast.open({
                 message: error.message,
                 type: 'error'
@@ -409,7 +405,7 @@ var vmMisDatos = Vue.component('mis-datos', {
                 </template>
                 <v-date-picker
                   class="selects-mis-datos"
-                  color="#4D83FF"
+                  color="primary"
                   ref="picker"
                   locale="es"
                   v-model="date"
@@ -460,7 +456,14 @@ var vmMisDatos = Vue.component('mis-datos', {
               <v-text-field v-model="userNumeroCuenta" label="Número de cuenta" v-mask="'####################'" clearable></v-text-field>
             </div>
             <div class="form-group col-12 col-md-6">
-              <v-text-field v-model="userCbu" label="C.B.U." :rules="[rules.reglasCbu]" counter="22" v-mask="'######################'" clearable></v-text-field>
+              <v-text-field
+                v-model="userCbu"
+                label="C.B.U."
+                :rules="[rules.reglasCbu]"
+                counter="22"
+                v-mask="'######################'"
+                clearable
+              ></v-text-field>
             </div>
           </div>
           <h6 class="font-weight-bold mb-3">FOTO DE PERFIL</h6>
@@ -482,28 +485,21 @@ var vmMisDatos = Vue.component('mis-datos', {
             </div>
           </div>
           <div class="row justify-content-center mt-3">
-            <div class="col-12 col-md-6">
-              <button
-                id="actualizar-datos"
-                type="button"
-                class="btn btn-block btn-lg font-weight-medium auth-form-btn"
-                v-bind:class="{'btn-primary': formValidation, 'btn-danger': !formValidation}"
-                v-bind:disabled="!formValidation"
-                v-on:click="updateData"
-              >
-                <div v-if="!actualizando && formValidation">
-                  <i class="mdi mdi-file-check btn-icon-prepend"></i>
-                  ACTUALIZAR
-                </div>
-                <div v-if="actualizando && formValidation">
-                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                </div>
-                <div v-if="!formValidation">
-                  <i class="mdi mdi-close-octagon btn-icon-prepend"></i>
-                  CORRIJA LOS ERRORES
-                </div>
-              </button>
-            </div>
+            <v-btn class="my-2" v-on:click="updateData" :disabled="actualizando || !formValidation" color="primary" width="350" x-large>
+              <div v-if="!actualizando && formValidation">
+                <i class="mdi mdi-file-check btn-icon-prepend"></i>
+                ACTUALIZAR
+              </div>
+              <div v-else-if="actualizando && formValidation">
+                <span class="custom-loader">
+                  <v-icon light>mdi-cached</v-icon>
+                </span>
+              </div>
+              <div v-else-if="!formValidation">
+                <i class="mdi mdi-close-octagon btn-icon-prepend"></i>
+                CORRIJA LOS ERRORES
+              </div>
+            </v-btn>
           </div>
         </v-form>
         <v-form v-if="isProductora" id="sign-up-form" class="pt-3" v-model="formValidation">
@@ -555,28 +551,21 @@ var vmMisDatos = Vue.component('mis-datos', {
             </div>
           </div>
           <div class="row justify-content-center mt-3">
-            <div class="col-12 col-md-6">
-              <button
-                id="actualizar-datos"
-                type="button"
-                class="btn btn-block btn-lg font-weight-medium auth-form-btn"
-                v-bind:class="{'btn-primary': formValidation, 'btn-danger': !formValidation}"
-                v-bind:disabled="!formValidation"
-                v-on:click="updateData"
-              >
-                <div v-if="!actualizando && formValidation">
-                  <i class="mdi mdi-file-check btn-icon-prepend"></i>
-                  ACTUALIZAR
-                </div>
-                <div v-if="actualizando && formValidation">
-                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                </div>
-                <div v-if="!formValidation">
-                  <i class="mdi mdi-close-octagon btn-icon-prepend"></i>
-                  CORRIJA LOS ERRORES
-                </div>
-              </button>
-            </div>
+            <v-btn class="my-2" v-on:click="updateData" :disabled="actualizando || !formValidation" color="primary" width="350" x-large>
+              <div v-if="!actualizando && formValidation">
+                <i class="mdi mdi-file-check btn-icon-prepend"></i>
+                ACTUALIZAR
+              </div>
+              <div v-else-if="actualizando && formValidation">
+                <span class="custom-loader">
+                  <v-icon light>mdi-cached</v-icon>
+                </span>
+              </div>
+              <div v-else-if="!formValidation">
+                <i class="mdi mdi-close-octagon btn-icon-prepend"></i>
+                CORRIJA LOS ERRORES
+              </div>
+            </v-btn>
           </div>
         </v-form>
       </div>
@@ -590,14 +579,14 @@ var vmMisDatos = Vue.component('mis-datos', {
         </div>
         <div id="botones-editor-imagen" class="row justify-content-center mx-0">
           <div class="col pl-0 pb-4">
-            <button id="cancelar-edicion-imagen" type="button" class="btn btn-secondary btn-block btn-lg font-weight-medium auth-form-btn">
+            <v-btn id="cancelar-edicion-imagen" color="normal" width="416" height="48">
               CANCELAR
-            </button>
+            </v-btn>
           </div>
           <div class="col pr-0 pb-4">
-            <button id="confirmar-edicion-imagen" type="button" class="btn btn-primary btn-block btn-lg font-weight-medium auth-form-btn">
+            <v-btn id="confirmar-edicion-imagen" color="primary" width="416" height="48">
               CONFIRMAR
-            </button>
+            </v-btn>
           </div>
         </div>
       </v-card>

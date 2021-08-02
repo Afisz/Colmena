@@ -127,7 +127,6 @@ var vmInicio = Vue.component('inicio', {
     },
     // Post proyecto nuevo
     crearProyecto: function () {
-      document.getElementById('boton-crear-proyecto').disabled = true;
       this.creandoAceptando = true;
       let _this = this;
       var datos = {
@@ -172,7 +171,6 @@ var vmInicio = Vue.component('inicio', {
                     foto: data.portada
                   });
                   _this.creandoAceptando = false;
-                  document.getElementById('boton-crear-proyecto').disabled = false;
                   _this.$refs.formDatos.resetValidation();
                   _this.$refs.formTecnicos.resetValidation();
                   _this.$refs.formFoto.resetValidation();
@@ -203,7 +201,6 @@ var vmInicio = Vue.component('inicio', {
                 })
                 .catch(function (error) {
                   _this.creandoAceptando = false;
-                  document.getElementById('boton-crear-proyecto').disabled = false;
                   _this.$toast.open({
                     message: error.message,
                     type: "error"
@@ -213,7 +210,6 @@ var vmInicio = Vue.component('inicio', {
             })
             .catch(function (error) {
               _this.creandoAceptando = false;
-              document.getElementById('boton-crear-proyecto').disabled = false;
               _this.$toast.open({
                 message: error.message,
                 type: "error"
@@ -413,7 +409,6 @@ var vmInicio = Vue.component('inicio', {
                     })
                   }
                   _this.creandoAceptando = false;
-                  document.getElementById('boton-aceptar-proyecto').disabled = false;
                   _this.$refs.formDatosContacto.resetValidation();
                   _this.$refs.formDatosCobroHaberes.resetValidation();
                   _this.dialogInvitacionProyecto = false;
@@ -438,7 +433,6 @@ var vmInicio = Vue.component('inicio', {
                 })
                 .catch(function (error) {
                   _this.creandoAceptando = false;
-                  document.getElementById('boton-aceptar-proyecto').disabled = false;
                   _this.$toast.open({
                     message: error.message,
                     type: 'error'
@@ -448,7 +442,6 @@ var vmInicio = Vue.component('inicio', {
             })
             .catch(function (error) {
               _this.creandoAceptando = false;
-              document.getElementById('boton-aceptar-proyecto').disabled = false;
               _this.$toast.open({
                 message: error.message,
                 type: 'error'
@@ -511,7 +504,6 @@ var vmInicio = Vue.component('inicio', {
     },
     // Abre el dialog para saber si guarda o no datos a la hora de aceptar el proyecto
     preAceptarProyecto: function () {
-      document.getElementById('boton-aceptar-proyecto').disabled = true;
       this.creandoAceptando = true;
       this.dialogGuardarDatos = true;
     },
@@ -1043,7 +1035,6 @@ var vmInicio = Vue.component('inicio', {
                 <v-stepper v-model="pasoProyecto">
                   <v-stepper-header>
                     <v-stepper-step
-                      color="#4d83ff"
                       :complete="pasoProyecto > 1 && formDatosValidation"
                       step="1"
                       :rules="[() => formDatosValidation]"
@@ -1053,7 +1044,6 @@ var vmInicio = Vue.component('inicio', {
                     </v-stepper-step>
                     <v-divider></v-divider>
                     <v-stepper-step
-                      color="#4d83ff"
                       :complete="pasoProyecto > 2 && formTecnicosValidation"
                       step="2"
                       :rules="[() => formTecnicosValidation]"
@@ -1062,9 +1052,7 @@ var vmInicio = Vue.component('inicio', {
                       TÉCNICXS Y PERMISOS
                     </v-stepper-step>
                     <v-divider></v-divider>
-                    <v-stepper-step color="#4d83ff" step="3" :rules="[() => formFotoValidation]" v-on:click="siguienteFilminaProyecto(2)">
-                      FOTO Y LOGO
-                    </v-stepper-step>
+                    <v-stepper-step step="3" :rules="[() => formFotoValidation]" v-on:click="siguienteFilminaProyecto(2)"> FOTO Y LOGO </v-stepper-step>
                   </v-stepper-header>
                   <v-stepper-items>
                     <v-stepper-content step="1">
@@ -1136,25 +1124,16 @@ var vmInicio = Vue.component('inicio', {
                           </div>
                         </v-form>
                       </v-card>
-                      <div class="row justify-content-center">
+                      <div class="row">
+                        <v-spacer></v-spacer>
                         <div class="col">
-                          <button
-                            type="button"
-                            class="btn btn-secondary btn-block btn-lg font-weight-medium auth-form-btn"
-                            v-on:click="cancelarProyectoNuevo"
-                          >
-                            CANCELAR
-                          </button>
+                          <v-btn v-on:click="cancelarProyectoNuevo" color="normal" width="416" height="48"> CANCELAR </v-btn>
                         </div>
+                        <v-spacer></v-spacer>
                         <div class="col">
-                          <button
-                            type="button"
-                            class="btn btn-primary btn-block btn-lg font-weight-medium auth-form-btn"
-                            v-on:click="siguienteFilminaProyecto(1)"
-                          >
-                            SIGUIENTE
-                          </button>
+                          <v-btn v-on:click="siguienteFilminaProyecto(1)" color="primary" width="416" height="48"> SIGUIENTE </v-btn>
                         </div>
+                        <v-spacer></v-spacer>
                       </div>
                     </v-stepper-content>
                     <v-stepper-content step="2">
@@ -1211,31 +1190,13 @@ var vmInicio = Vue.component('inicio', {
                       </v-card>
                       <div class="row justify-content-center">
                         <div class="col-3">
-                          <button
-                            type="button"
-                            class="btn btn-secondary btn-block btn-lg font-weight-medium auth-form-btn"
-                            v-on:click="cancelarProyectoNuevo"
-                          >
-                            CANCELAR
-                          </button>
+                          <v-btn v-on:click="cancelarProyectoNuevo" color="normal" width="198" height="48"> CANCELAR </v-btn>
                         </div>
                         <div class="col-3">
-                          <button
-                            type="button"
-                            class="btn btn-outline-secondary btn-block btn-lg font-weight-medium auth-form-btn"
-                            v-on:click="pasoProyecto--"
-                          >
-                            ATRÁS
-                          </button>
+                          <v-btn v-on:click="pasoProyecto--" color="normal" outlined width="198" height="48"> ATRÁS </v-btn>
                         </div>
                         <div class="col-6">
-                          <button
-                            type="button"
-                            class="btn btn-primary btn-block btn-lg font-weight-medium auth-form-btn"
-                            v-on:click="siguienteFilminaProyecto(2)"
-                          >
-                            SIGUIENTE
-                          </button>
+                          <v-btn v-on:click="siguienteFilminaProyecto(2)" color="primary" width="416" height="48"> SIGUIENTE </v-btn>
                         </div>
                       </div>
                     </v-stepper-content>
@@ -1267,42 +1228,24 @@ var vmInicio = Vue.component('inicio', {
                       </v-card>
                       <div class="row justify-content-center">
                         <div class="col-3">
-                          <button
-                            type="button"
-                            class="btn btn-secondary btn-block btn-lg font-weight-medium auth-form-btn"
-                            v-on:click="cancelarProyectoNuevo"
-                          >
-                            CANCELAR
-                          </button>
+                          <v-btn v-on:click="cancelarProyectoNuevo" :disabled="creandoAceptando" color="normal" width="198" height="48"> CANCELAR </v-btn>
                         </div>
                         <div class="col-3">
-                          <button
-                            type="button"
-                            class="btn btn-outline-secondary btn-block btn-lg font-weight-medium auth-form-btn"
-                            v-on:click="pasoProyecto--"
-                          >
-                            ATRÁS
-                          </button>
+                          <v-btn v-on:click="pasoProyecto--" :disabled="creandoAceptando" color="normal" outlined width="198" height="48"> ATRÁS </v-btn>
                         </div>
                         <div class="col-6">
-                          <button
-                            id="boton-crear-proyecto"
-                            type="button"
-                            class="btn btn-block btn-lg font-weight-medium auth-form-btn"
-                            style="height: 48px; padding: 0px"
-                            v-bind:class="{'btn-primary': completeFormValidationProyectoNuevo, 'btn-danger': !completeFormValidationProyectoNuevo}"
-                            v-bind:disabled="!completeFormValidationProyectoNuevo"
-                            v-on:click="crearProyecto"
-                          >
+                          <v-btn v-on:click="crearProyecto" :disabled="creandoAceptando || !completeFormValidationProyectoNuevo" color="primary" width="416" height="48">
                             <div v-if="!creandoAceptando && completeFormValidationProyectoNuevo">CREAR PROYECTO</div>
-                            <div v-if="creandoAceptando && completeFormValidationProyectoNuevo">
-                              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <div v-else-if="creandoAceptando && completeFormValidationProyectoNuevo">
+                              <span class="custom-loader">
+                                <v-icon light>mdi-cached</v-icon>
+                              </span>
                             </div>
-                            <div v-if="!completeFormValidationProyectoNuevo">
+                            <div v-else-if="!completeFormValidationProyectoNuevo">
                               <i class="mdi mdi-close-octagon btn-icon-prepend"></i>
                               CORRIJA LOS ERRORES
                             </div>
-                          </button>
+                          </v-btn>
                         </div>
                       </div>
                     </v-stepper-content>
@@ -1352,14 +1295,10 @@ var vmInicio = Vue.component('inicio', {
         </div>
         <div id="botones-editor-imagen" class="row justify-content-center mx-0">
           <div class="col pl-0 pb-4">
-            <button id="cancelar-edicion-imagen" type="button" class="btn btn-secondary btn-block btn-lg font-weight-medium auth-form-btn">
-              CANCELAR
-            </button>
+            <v-btn id="cancelar-edicion-imagen" color="normal" width="416" height="48"> CANCELAR </v-btn>
           </div>
           <div class="col pr-0 pb-4">
-            <button id="confirmar-edicion-imagen" type="button" class="btn btn-primary btn-block btn-lg font-weight-medium auth-form-btn">
-              CONFIRMAR
-            </button>
+            <v-btn id="confirmar-edicion-imagen" color="primary" width="416" height="48"> CONFIRMAR </v-btn>
           </div>
         </div>
       </v-card>
@@ -1368,7 +1307,6 @@ var vmInicio = Vue.component('inicio', {
       <v-stepper v-model="pasoProyecto">
         <v-stepper-header>
           <v-stepper-step
-            color="#4d83ff"
             :complete="pasoProyecto > 1 && formDatosContacto"
             step="1"
             :rules="[() => formDatosContacto]"
@@ -1377,7 +1315,7 @@ var vmInicio = Vue.component('inicio', {
             DATOS DE CONTACTO
           </v-stepper-step>
           <v-divider></v-divider>
-          <v-stepper-step color="#4d83ff" step="2" :rules="[() => formDatosCobroHaberes]" v-on:click="siguienteFilminaProyecto(1)">
+          <v-stepper-step step="2" :rules="[() => formDatosCobroHaberes]" v-on:click="siguienteFilminaProyecto(1)">
             DATOS PARA EL COBRO DE HABERES
           </v-stepper-step>
         </v-stepper-header>
@@ -1387,7 +1325,7 @@ var vmInicio = Vue.component('inicio', {
               <v-card-text class="px-0">
                 Fuiste invitadx a participar en {{tipoProyectoAceptado == 'Cine' ? 'la nueva película' : tipoProyectoAceptado == 'TV' ? 'la nueva serie' : 'el nuevo proyecto'}}
                  de {{productoraProyectoAceptado}}: "{{nombreProyectoAceptado}}". Completá y/o corregí tus datos y aceptá el proyecto para compartirlos con la productora (o presioná
-                <a style="color: #4d83ff" v-on:click="dialogDeclinacionInvitacion = true">acá</a> para declinar la invitación):
+                <a style="color: #1976d2" v-on:click="dialogDeclinacionInvitacion = true">acá</a> para declinar la invitación):
               </v-card-text>
               <v-form lazy-validation class="pt-3" v-model="formDatosContacto" ref="formDatosContacto">
                 <div class="row w-100">
@@ -1444,7 +1382,6 @@ var vmInicio = Vue.component('inicio', {
                       </template>
                       <v-date-picker
                         class="selects-mis-datos"
-                        color="#4D83FF"
                         ref="picker"
                         locale="es"
                         v-model="date"
@@ -1457,21 +1394,16 @@ var vmInicio = Vue.component('inicio', {
                 </div>
               </v-form>
             </v-card>
-            <div class="row justify-content-center">
+            <div class="row">
+              <v-spacer></v-spacer>
               <div class="col">
-                <button type="button" class="btn btn-secondary btn-block btn-lg font-weight-medium auth-form-btn" v-on:click="cancelarAceptarProyecto">
-                  CANCELAR
-                </button>
+                <v-btn v-on:click="cancelarAceptarProyecto" color="normal" width="416" height="48"> CANCELAR </v-btn>
               </div>
+              <v-spacer></v-spacer>
               <div class="col">
-                <button
-                  type="button"
-                  class="btn btn-primary btn-block btn-lg font-weight-medium auth-form-btn"
-                  v-on:click="siguienteFilminaProyecto(1)"
-                >
-                  SIGUIENTE
-                </button>
+                <v-btn v-on:click="siguienteFilminaProyecto(1)" color="primary" width="416" height="48"> SIGUIENTE </v-btn>
               </div>
+              <v-spacer></v-spacer>
             </div>
           </v-stepper-content>
           <v-stepper-content step="2">
@@ -1555,34 +1487,24 @@ var vmInicio = Vue.component('inicio', {
             </v-card>
             <div class="row justify-content-center">
               <div class="col-3">
-                <button type="button" class="btn btn-secondary btn-block btn-lg font-weight-medium auth-form-btn" v-on:click="cancelarAceptarProyecto">
-                  CANCELAR
-                </button>
+                <v-btn v-on:click="cancelarAceptarProyecto" :disabled="creandoAceptando" color="normal" width="198" height="48"> CANCELAR </v-btn>
               </div>
               <div class="col-3">
-                <button type="button" class="btn btn-outline-secondary btn-block btn-lg font-weight-medium auth-form-btn" v-on:click="pasoProyecto--">
-                  ATRÁS
-                </button>
+                <v-btn v-on:click="pasoProyecto--" :disabled="creandoAceptando" color="normal" outlined width="198" height="48"> ATRÁS </v-btn>
               </div>
               <div class="col-6">
-                <button
-                  id="boton-aceptar-proyecto"
-                  type="button"
-                  class="btn btn-block btn-lg font-weight-medium auth-form-btn"
-                  style="height: 48px; padding: 0px"
-                  v-bind:class="{'btn-primary': completeFormValidationAceptarProyecto, 'btn-danger': !completeFormValidationAceptarProyecto}"
-                  v-bind:disabled="!completeFormValidationAceptarProyecto"
-                  v-on:click="preAceptarProyecto"
-                >
+                <v-btn v-on:click="preAceptarProyecto" :disabled="creandoAceptando || !completeFormValidationAceptarProyecto" color="primary" width="416" height="48">
                   <div v-if="!creandoAceptando && completeFormValidationAceptarProyecto">ACEPTAR PROYECTO</div>
-                  <div v-if="creandoAceptando && completeFormValidationAceptarProyecto">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <div v-else-if="creandoAceptando && completeFormValidationAceptarProyecto">
+                    <span class="custom-loader">
+                      <v-icon light>mdi-cached</v-icon>
+                    </span>
                   </div>
-                  <div v-if="!completeFormValidationAceptarProyecto">
+                  <div v-else-if="!completeFormValidationAceptarProyecto">
                     <i class="mdi mdi-close-octagon btn-icon-prepend"></i>
                     CORRIJA LOS ERRORES
                   </div>
-                </button>
+                </v-btn>
               </div>
             </div>
           </v-stepper-content>
@@ -1609,5 +1531,5 @@ var vmInicio = Vue.component('inicio', {
       v-bind:funcionBotonPrincipal="aceptarProyectoYGuardarDatos.bind(true)"
       v-on:cancelar="aceptarProyectoYGuardarDatos(false)"
     ></dialog-dos-botones-multifuncion>
-    </div>`
+  </div>`
 })

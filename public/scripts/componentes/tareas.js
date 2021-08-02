@@ -83,9 +83,9 @@ var vmTareas = Vue.component('tareas', {
       <div class="form w-100" v-on:keyup.enter="agregarTarea">
         <div class="form-group d-flex">
           <input type="text" class="form-control todo-list-input" placeholder="Añadir tarea" v-model:value="tareaNueva"/>
-          <button class="add btn btn-primary todo-list-add-btn" v-on:click="agregarTarea">
+          <v-btn class="add todo-list-add-btn" v-on:click="agregarTarea" color="primary" width="89" height="46">
             Añadir
-          </button>
+          </v-btn>
         </div>
       </div>
     </div>

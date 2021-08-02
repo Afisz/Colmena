@@ -117,6 +117,7 @@ tecnicoProyectosRouter.post("", (req: any, res: any, next) => {
         const invitacionesTecnico = docUsuario.data().invitacionesProyectos;
         var invitacionAProyecto = null;
         var proyectoDelTecnico = null;
+        var areaInvitacion = "";
 
         db.doc(`proyectos/${data.idProyecto}`)
           .get()
@@ -131,6 +132,7 @@ tecnicoProyectosRouter.post("", (req: any, res: any, next) => {
             }
 
             if (tecnicoInvitado != null) {
+              areaInvitacion = tecnicoInvitado.area;
               promises.push(
                 db.doc(`proyectos/${data.idProyecto}`).update({
                   tecnicosInvitados: admin.firestore.FieldValue.arrayRemove(tecnicoInvitado),
@@ -163,7 +165,7 @@ tecnicoProyectosRouter.post("", (req: any, res: any, next) => {
                   },
                   alta: null,
                   baja: null,
-                  area: "",
+                  area: areaInvitacion,
                   puesto: "",
                   sueldoBruto: null,
                   idProyecto: data.idProyecto,
@@ -199,7 +201,7 @@ tecnicoProyectosRouter.post("", (req: any, res: any, next) => {
                   },
                   alta: null,
                   baja: null,
-                  area: "",
+                  area: areaInvitacion,
                   puesto: "",
                   sueldoBruto: null,
                   idProyecto: data.idProyecto,
